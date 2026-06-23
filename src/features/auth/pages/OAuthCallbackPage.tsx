@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../AuthContext"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // ปลายทางที่ backend redirect กลับมาหลัง OAuth สำเร็จ:
 //   /auth/callback#accessToken=...&refreshToken=...
@@ -32,17 +34,27 @@ export function OAuthCallbackPage() {
 
   if (error) {
     return (
-      <div className="center-screen">
-        <div className="card">
-          <h1>เข้าสู่ระบบไม่สำเร็จ</h1>
-          <p className="muted">ลิงก์ไม่ถูกต้องหรือหมดอายุ</p>
-          <button className="btn-primary" onClick={() => navigate("/login")}>
-            กลับไปหน้าเข้าสู่ระบบ
-          </button>
-        </div>
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <Card className="w-full max-w-sm text-center">
+          <CardHeader>
+            <CardTitle>เข้าสู่ระบบไม่สำเร็จ</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-muted-foreground text-sm">
+              ลิงก์ไม่ถูกต้องหรือหมดอายุ
+            </p>
+            <Button onClick={() => navigate("/login")}>
+              กลับไปหน้าเข้าสู่ระบบ
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  return <div className="center-screen">กำลังเข้าสู่ระบบ…</div>
+  return (
+    <div className="text-muted-foreground flex min-h-screen items-center justify-center">
+      กำลังเข้าสู่ระบบ…
+    </div>
+  )
 }
