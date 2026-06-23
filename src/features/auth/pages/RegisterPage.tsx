@@ -3,6 +3,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { useMutation } from "@tanstack/react-query"
 import { authApi } from "../api/auth.api"
 import { getApiErrorMessage } from "@/shared/api/errors"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -24,61 +28,69 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="center-screen">
-      <div className="card">
-        <h1>สมัครสมาชิก</h1>
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>สมัครสมาชิก</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="displayName">ชื่อที่แสดง</Label>
+              <Input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">อีเมล</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">รหัสผ่าน</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                minLength={8}
+              />
+            </div>
 
-        <form onSubmit={onSubmit} className="form">
-          <label>
-            ชื่อที่แสดง
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              autoComplete="name"
-            />
-          </label>
-          <label>
-            อีเมล
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            รหัสผ่าน
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              minLength={8}
-            />
-          </label>
+            {register.isError && (
+              <p className="text-destructive text-sm">
+                {getApiErrorMessage(register.error, "สมัครสมาชิกไม่สำเร็จ")}
+              </p>
+            )}
 
-          {register.isError && (
-            <p className="error">
-              {getApiErrorMessage(register.error, "สมัครสมาชิกไม่สำเร็จ")}
-            </p>
-          )}
+            <Button type="submit" disabled={register.isPending}>
+              {register.isPending ? "กำลังสมัคร…" : "สมัครสมาชิก"}
+            </Button>
+          </form>
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={register.isPending}
-          >
-            {register.isPending ? "กำลังสมัคร…" : "สมัครสมาชิก"}
-          </button>
-        </form>
-
-        <p className="muted">
-          มีบัญชีอยู่แล้ว? <Link to="/login">เข้าสู่ระบบ</Link>
-        </p>
-      </div>
+          <p className="text-muted-foreground mt-5 text-center text-sm">
+            มีบัญชีอยู่แล้ว?{" "}
+            <Link
+              to="/login"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              เข้าสู่ระบบ
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
