@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+# ยกเลิก run เก่าของ branch เดียวกันเมื่อมี push ใหม่
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # type-check (tsc --noEmit) — จับ type error ก่อนถึง prod
+      - name: Type check
+        run: npm run lint
+
+      # vite build — ยืนยันว่า bundle production สร้างได้จริง (เหมือนที่ Vercel รัน)
+      # ไม่ต้องใช้ VITE_API_URL ที่นี่ (ค่าจริงตั้งใน Vercel ตอน deploy)
+      - name: Build
+        run: npx vite build

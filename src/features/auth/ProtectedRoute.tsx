@@ -6,7 +6,11 @@ export function ProtectedRoute() {
   const { status } = useAuth()
 
   if (status === "loading") {
-    return <div className="center-screen">Loading…</div>
+    return (
+      <div className="text-muted-foreground flex min-h-screen items-center justify-center">
+        Loading…
+      </div>
+    )
   }
   if (status === "unauthenticated") {
     return <Navigate to="/login" replace />

@@ -4,6 +4,10 @@ import { useMutation } from "@tanstack/react-query"
 import { authApi } from "../api/auth.api"
 import { useAuth } from "../AuthContext"
 import { getApiErrorMessage } from "@/shared/api/errors"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -27,58 +31,73 @@ export function LoginPage() {
   }
 
   return (
-    <div className="center-screen">
-      <div className="card">
-        <h1>เข้าสู่ระบบ</h1>
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>เข้าสู่ระบบ</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-5">
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">อีเมล</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">รหัสผ่าน</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
 
-        <form onSubmit={onSubmit} className="form">
-          <label>
-            อีเมล
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            รหัสผ่าน
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </label>
+            {login.isError && (
+              <p className="text-destructive text-sm">
+                {getApiErrorMessage(login.error, "เข้าสู่ระบบไม่สำเร็จ")}
+              </p>
+            )}
 
-          {login.isError && (
-            <p className="error">
-              {getApiErrorMessage(login.error, "เข้าสู่ระบบไม่สำเร็จ")}
-            </p>
-          )}
+            <Button type="submit" disabled={login.isPending}>
+              {login.isPending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+            </Button>
+          </form>
 
-          <button type="submit" className="btn-primary" disabled={login.isPending}>
-            {login.isPending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
-          </button>
-        </form>
+          <div className="text-muted-foreground flex items-center gap-3 text-xs">
+            <span className="bg-border h-px flex-1" />
+            หรือ
+            <span className="bg-border h-px flex-1" />
+          </div>
 
-        <div className="divider">หรือ</div>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" asChild>
+              <a href={`${API_URL}/api/v1/auth/google`}>เข้าสู่ระบบด้วย Google</a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={`${API_URL}/api/v1/auth/github`}>เข้าสู่ระบบด้วย GitHub</a>
+            </Button>
+          </div>
 
-        <div className="oauth">
-          <a className="btn-oauth" href={`${API_URL}/api/v1/auth/google`}>
-            เข้าสู่ระบบด้วย Google
-          </a>
-          <a className="btn-oauth" href={`${API_URL}/api/v1/auth/github`}>
-            เข้าสู่ระบบด้วย GitHub
-          </a>
-        </div>
-
-        <p className="muted">
-          ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
-        </p>
-      </div>
+          <p className="text-muted-foreground text-center text-sm">
+            ยังไม่มีบัญชี?{" "}
+            <Link
+              to="/register"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              สมัครสมาชิก
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
