@@ -16,6 +16,7 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { boardApi } from "../api/board.api"
 import { BoardColumn } from "../components/BoardColumn"
 import { CardDetailModal } from "../components/CardDetailModal"
+import { ActivityFeed } from "../components/ActivityFeed"
 import type { Card } from "../types"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -249,8 +250,9 @@ export function BoardPage() {
           </button>
         )}
 
-        {/* ลบทั้งบอร์ด — ดันไปขวาสุด */}
-        <div className="ml-auto">
+        {/* ประวัติ + ลบทั้งบอร์ด — ดันไปขวาสุด */}
+        <div className="ml-auto flex items-center gap-1">
+          <ActivityFeed orgId={orgId} boardId={boardId} />
           {confirmDeleteBoard ? (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">ลบทั้งบอร์ด?</span>

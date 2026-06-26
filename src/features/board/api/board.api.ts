@@ -1,5 +1,13 @@
 import { api } from "@/shared/api/client"
-import type { Assignee, Board, Card, Comment, Label, List } from "../types"
+import type {
+  Activity,
+  Assignee,
+  Board,
+  Card,
+  Comment,
+  Label,
+  List,
+} from "../types"
 
 // path ฐานของ board ภายใต้ org หนึ่ง
 const base = (orgId: string) => `/organizations/${orgId}/boards`
@@ -212,5 +220,11 @@ export const boardApi = {
     await api.delete(
       `${base(orgId)}/${boardId}/cards/${cardId}/labels/${labelId}`
     )
+  },
+
+  // --- Activity feed ---
+  async listActivities(orgId: string, boardId: string): Promise<Activity[]> {
+    const res = await api.get(`${base(orgId)}/${boardId}/activities`)
+    return res.data.data.activities
   },
 }

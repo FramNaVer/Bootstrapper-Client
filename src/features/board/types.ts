@@ -75,3 +75,27 @@ export interface Comment {
   createdAt: string
   updatedAt: string
 }
+
+export type ActivityAction =
+  | "CARD_CREATED"
+  | "CARD_MOVED"
+  | "CARD_UPDATED"
+  | "CARD_DELETED"
+  | "COMMENT_ADDED"
+  | "MEMBER_ASSIGNED"
+  | "LIST_CREATED"
+  | "LIST_RENAMED"
+  | "LIST_DELETED"
+
+// ฟีดความเคลื่อนไหวของบอร์ด — backend แนบชื่อคนทำ + payload
+// (การ์ดใช้ title, คอลัมน์ใช้ name)
+export interface Activity {
+  id: string
+  boardId: string
+  actorId: string
+  actorName: string | null
+  actorEmail: string
+  action: ActivityAction
+  payload: { cardId?: string; title?: string; listId?: string; name?: string } | null
+  createdAt: string
+}
