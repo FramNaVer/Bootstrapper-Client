@@ -23,6 +23,9 @@ export function BoardColumn({ orgId, boardId, list, cards, onCardOpen }: Props) 
   const queryClient = useQueryClient()
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState("")
+  const [renaming, setRenaming] = useState(false)
+  const [name, setName] = useState(list.name)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   // ทำให้ทั้งคอลัมน์เป็น droppable (id = list.id) → ลากการ์ดมาวางในคอลัมน์ว่างได้
   const { setNodeRef } = useDroppable({ id: list.id })
@@ -37,17 +40,98 @@ export function BoardColumn({ orgId, boardId, list, cards, onCardOpen }: Props) 
     },
   })
 
+  const rename = useMutation({
+    mutationFn: () =>
+      boardApi.updateList(orgId, boardId, list.id, { name: name.trim() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists", boardId] })
+      setRenaming(false)
+    },
+  })
+
+  const removeList = useMutation({
+    mutationFn: () => boardApi.deleteList(orgId, boardId, list.id),
+    onSuccess: () => {
+      // ลบคอลัมน์ → การ์ดข้างในหายด้วย (cascade) → refresh ทั้งคู่
+      queryClient.invalidateQueries({ queryKey: ["lists", boardId] })
+      queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+    },
+  })
+
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     if (title.trim()) createCard.mutate()
   }
 
+  function saveName() {
+    if (name.trim() && name.trim() !== list.name) rename.mutate()
+    else {
+      setName(list.name)
+      setRenaming(false)
+    }
+  }
+
   return (
     <div className="bg-card/60 border-border flex max-h-full w-72 shrink-0 flex-col rounded-lg border p-3">
-      <h3 className="mb-2 flex items-center justify-between px-1 text-sm font-semibold">
-        {list.name}
-        <span className="text-muted-foreground font-normal">{cards.length}</span>
-      </h3>
+      {/* หัวคอลัมน์: คลิกชื่อเพื่อเปลี่ยน, ปุ่มลบโผล่ตอน hover */}
+      <div className="group mb-2 flex items-center justify-between gap-1 px-1">
+        {renaming ? (
+          <Input
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={saveName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveName()
+              if (e.key === "Escape") {
+                setName(list.name)
+                setRenaming(false)
+              }
+            }}
+            className="h-7 text-sm font-semibold"
+          />
+        ) : (
+          <>
+            <button
+              onClick={() => setRenaming(true)}
+              className="truncate text-left text-sm font-semibold hover:underline"
+              title="คลิกเพื่อเปลี่ยนชื่อ"
+            >
+              {list.name}
+            </button>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="text-muted-foreground text-sm">
+                {cards.length}
+              </span>
+              {confirmDelete ? (
+                <span className="flex items-center gap-1 text-xs">
+                  <button
+                    onClick={() => removeList.mutate()}
+                    disabled={removeList.isPending}
+                    className="text-destructive font-medium"
+                  >
+                    ลบ?
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="text-muted-foreground"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="text-muted-foreground hover:text-destructive text-sm opacity-0 group-hover:opacity-100"
+                  title="ลบคอลัมน์"
+                >
+                  🗑
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       <SortableContext
         items={cards.map((c) => c.id)}

@@ -21,6 +21,17 @@ export const boardApi = {
     const res = await api.post(base(orgId), data)
     return res.data.data.board
   },
+  async updateBoard(
+    orgId: string,
+    boardId: string,
+    data: { name?: string; description?: string | null }
+  ): Promise<Board> {
+    const res = await api.patch(`${base(orgId)}/${boardId}`, data)
+    return res.data.data.board
+  },
+  async deleteBoard(orgId: string, boardId: string): Promise<void> {
+    await api.delete(`${base(orgId)}/${boardId}`)
+  },
 
   // --- Lists ---
   async listLists(orgId: string, boardId: string): Promise<List[]> {
@@ -34,6 +45,25 @@ export const boardApi = {
   ): Promise<List> {
     const res = await api.post(`${base(orgId)}/${boardId}/lists`, { name })
     return res.data.data.list
+  },
+  async updateList(
+    orgId: string,
+    boardId: string,
+    listId: string,
+    data: { name?: string; position?: number }
+  ): Promise<List> {
+    const res = await api.patch(
+      `${base(orgId)}/${boardId}/lists/${listId}`,
+      data
+    )
+    return res.data.data.list
+  },
+  async deleteList(
+    orgId: string,
+    boardId: string,
+    listId: string
+  ): Promise<void> {
+    await api.delete(`${base(orgId)}/${boardId}/lists/${listId}`)
   },
 
   // --- Cards ---

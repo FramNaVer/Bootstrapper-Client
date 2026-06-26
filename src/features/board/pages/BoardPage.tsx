@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   DndContext,
@@ -36,6 +36,7 @@ function computePosition(items: Card[], index: number): number {
 export function BoardPage() {
   const { orgId, boardId } = useParams() as { orgId: string; boardId: string }
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const board = useQuery({
     queryKey: ["board", boardId],
@@ -181,6 +182,41 @@ export function BoardPage() {
     if (listName.trim()) createList.mutate()
   }
 
+  // --- rename / delete board ---
+  const [boardRenaming, setBoardRenaming] = useState(false)
+  const [boardName, setBoardName] = useState("")
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState(false)
+
+  const renameBoard = useMutation({
+    mutationFn: () =>
+      boardApi.updateBoard(orgId, boardId, { name: boardName.trim() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] })
+      queryClient.invalidateQueries({ queryKey: ["boards", orgId] })
+      setBoardRenaming(false)
+    },
+  })
+
+  const removeBoard = useMutation({
+    mutationFn: () => boardApi.deleteBoard(orgId, boardId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards", orgId] })
+      navigate(`/org/${orgId}`) // ลบทั้งบอร์ดแล้ว → กลับหน้า org
+    },
+  })
+
+  function startRenameBoard() {
+    setBoardName(board.data?.name ?? "")
+    setBoardRenaming(true)
+  }
+  function saveBoardName() {
+    if (boardName.trim() && boardName.trim() !== board.data?.name) {
+      renameBoard.mutate()
+    } else {
+      setBoardRenaming(false)
+    }
+  }
+
   return (
     <div className="flex h-[calc(100vh-57px)] flex-col">
       <div className="flex items-center gap-3 px-6 py-3">
@@ -190,7 +226,61 @@ export function BoardPage() {
         >
           ← บอร์ด
         </Link>
-        <h1 className="text-lg font-semibold">{board.data?.name ?? "บอร์ด"}</h1>
+
+        {boardRenaming ? (
+          <Input
+            autoFocus
+            value={boardName}
+            onChange={(e) => setBoardName(e.target.value)}
+            onBlur={saveBoardName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveBoardName()
+              if (e.key === "Escape") setBoardRenaming(false)
+            }}
+            className="h-8 w-64 text-lg font-semibold"
+          />
+        ) : (
+          <button
+            onClick={startRenameBoard}
+            className="text-lg font-semibold hover:underline"
+            title="คลิกเพื่อเปลี่ยนชื่อบอร์ด"
+          >
+            {board.data?.name ?? "บอร์ด"}
+          </button>
+        )}
+
+        {/* ลบทั้งบอร์ด — ดันไปขวาสุด */}
+        <div className="ml-auto">
+          {confirmDeleteBoard ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">ลบทั้งบอร์ด?</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmDeleteBoard(false)}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={removeBoard.isPending}
+                onClick={() => removeBoard.mutate()}
+              >
+                {removeBoard.isPending ? "กำลังลบ…" : "ยืนยันลบ"}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={() => setConfirmDeleteBoard(true)}
+            >
+              ลบบอร์ด
+            </Button>
+          )}
+        </div>
       </div>
 
       {lists.isError && <p className="text-destructive px-6">โหลดบอร์ดไม่สำเร็จ</p>}
