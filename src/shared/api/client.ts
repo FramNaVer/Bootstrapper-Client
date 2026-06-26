@@ -56,10 +56,15 @@ api.interceptors.response.use(
         return api(original)
       } catch (refreshError) {
         refreshing = null
-        // refresh ไม่ผ่าน → session หมดจริง → ล้าง token + กลับหน้า login
-        tokenStorage.clear()
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login"
+        // ล้าง session เฉพาะตอน refresh ถูก "ปฏิเสธจริง" (401/403 = token หมดอายุ/ถูก revoke)
+        // ไม่ใช่ตอนโดน 429 (rate limit) หรือเน็ตหลุด — พวกนั้นเป็นปัญหาชั่วคราว
+        // ถ้าล้าง token เพราะ 429 = ผู้ใช้โดนเด้งออกทั้งที่ session ยังดีอยู่
+        const status = (refreshError as AxiosError)?.response?.status
+        if (status === 401 || status === 403) {
+          tokenStorage.clear()
+          if (window.location.pathname !== "/login") {
+            window.location.href = "/login"
+          }
         }
         return Promise.reject(refreshError)
       }
