@@ -17,6 +17,18 @@ export interface List {
   updatedAt: string
 }
 
+// ข้อมูลย่อที่ติดมากับการ์ดตอน list (ใช้โชว์ chip บนการ์ด)
+export interface CardLabelSummary {
+  id: string
+  name: string
+  color: string
+}
+export interface CardAssigneeSummary {
+  userId: string
+  displayName: string | null
+  email: string
+}
+
 export interface Card {
   id: string
   organizationId: string
@@ -28,6 +40,9 @@ export interface Card {
   dueDate: string | null
   createdAt: string
   updatedAt: string
+  // มาเฉพาะตอน listCards (getCard/move ไม่ส่งมา) → optional
+  labels?: CardLabelSummary[]
+  assignees?: CardAssigneeSummary[]
 }
 
 // ป้ายกำกับ (board-level) — สีเก็บเป็น hex

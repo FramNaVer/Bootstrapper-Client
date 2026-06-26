@@ -5,6 +5,7 @@ import { organizationApi } from "@/features/organization/api/organization.api"
 import { useAuth } from "@/features/auth/AuthContext"
 import { getApiErrorMessage } from "@/shared/api/errors"
 import type { Card } from "../types"
+import { Avatar, initials } from "./Avatar"
 import {
   Dialog,
   DialogContent,
@@ -20,31 +21,6 @@ const LABEL_COLORS = [
   "#61BD4F", "#F2D600", "#FF9F1A", "#EB5A46",
   "#C377E0", "#0079BF", "#00C2E0", "#838C91",
 ]
-
-// ตัวอักษรย่อสำหรับ avatar — กันพังถ้าข้อมูลขาด (เช่น backend เวอร์ชันเก่ายังไม่ส่ง email)
-function initials(name: string | null | undefined, email: string | undefined): string {
-  const base = name?.trim() || email || "?"
-  return base.slice(0, 2).toUpperCase()
-}
-
-// สีพื้น avatar คงที่ตาม id (ให้คนเดิมสีเดิมเสมอ)
-function avatarColor(seed: string): string {
-  let h = 0
-  for (let i = 0; i < seed.length; i++) h = seed.charCodeAt(i) + ((h << 5) - h)
-  return `hsl(${Math.abs(h) % 360} 55% 45%)`
-}
-
-function Avatar({ seed, label }: { seed: string; label: string }) {
-  return (
-    <span
-      title={label}
-      className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-      style={{ backgroundColor: avatarColor(seed) }}
-    >
-      {label}
-    </span>
-  )
-}
 
 // หัวข้อย่อยของแต่ละ section
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -294,8 +270,11 @@ function LabelSection({
     enabled: picking,
   })
 
-  const refresh = () =>
+  // refresh ทั้ง label ในโมดอล และ chip บนการ์ดในบอร์ด
+  const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["cardLabels", cardId] })
+    queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+  }
 
   const attach = useMutation({
     mutationFn: (labelId: string) =>
@@ -427,8 +406,11 @@ function AssigneeSection({
     enabled: picking,
   })
 
-  const refresh = () =>
+  // refresh ทั้ง assignee ในโมดอล และ avatar บนการ์ดในบอร์ด
+  const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["assignees", cardId] })
+    queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+  }
 
   const assign = useMutation({
     mutationFn: (userId: string) =>
