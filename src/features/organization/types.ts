@@ -9,3 +9,12 @@ export interface Organization {
   createdAt: string
   updatedAt: string
 }
+
+// สมาชิกใน org (ใช้ตอนเลือกคนมอบหมายการ์ด)
+export interface Member {
+  userId: string
+  email: string
+  displayName: string | null
+  role: MembershipRole
+  joinedAt: string
+}

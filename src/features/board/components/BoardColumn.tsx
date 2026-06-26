@@ -16,9 +16,10 @@ interface Props {
   boardId: string
   list: List
   cards: Card[] // การ์ดของ list นี้ เรียง position แล้ว (จาก local state ของ BoardPage)
+  onCardOpen: (cardId: string) => void
 }
 
-export function BoardColumn({ orgId, boardId, list, cards }: Props) {
+export function BoardColumn({ orgId, boardId, list, cards, onCardOpen }: Props) {
   const queryClient = useQueryClient()
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState("")
@@ -54,7 +55,7 @@ export function BoardColumn({ orgId, boardId, list, cards }: Props) {
       >
         <div ref={setNodeRef} className="flex min-h-2 flex-col gap-2 overflow-y-auto">
           {cards.map((card) => (
-            <CardItem key={card.id} card={card} />
+            <CardItem key={card.id} card={card} onOpen={onCardOpen} />
           ))}
         </div>
       </SortableContext>

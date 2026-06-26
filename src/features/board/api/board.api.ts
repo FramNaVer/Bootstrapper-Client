@@ -1,5 +1,5 @@
 import { api } from "@/shared/api/client"
-import type { Board, Card, List } from "../types"
+import type { Assignee, Board, Card, Comment, Label, List } from "../types"
 
 // path ฐานของ board ภายใต้ org หนึ่ง
 const base = (orgId: string) => `/organizations/${orgId}/boards`
@@ -61,5 +61,126 @@ export const boardApi = {
       data
     )
     return res.data.data.card
+  },
+  async getCard(orgId: string, boardId: string, cardId: string): Promise<Card> {
+    const res = await api.get(`${base(orgId)}/${boardId}/cards/${cardId}`)
+    return res.data.data.card
+  },
+  async updateCard(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    // dueDate: ISO string เพื่อ "ตั้ง", null เพื่อ "ล้าง", undefined = ไม่แตะ
+    data: { title?: string; description?: string | null; dueDate?: string | null }
+  ): Promise<Card> {
+    const res = await api.patch(`${base(orgId)}/${boardId}/cards/${cardId}`, data)
+    return res.data.data.card
+  },
+  async deleteCard(orgId: string, boardId: string, cardId: string): Promise<void> {
+    await api.delete(`${base(orgId)}/${boardId}/cards/${cardId}`)
+  },
+
+  // --- Comments ---
+  async listComments(
+    orgId: string,
+    boardId: string,
+    cardId: string
+  ): Promise<Comment[]> {
+    const res = await api.get(
+      `${base(orgId)}/${boardId}/cards/${cardId}/comments`
+    )
+    return res.data.data.comments
+  },
+  async addComment(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    body: string
+  ): Promise<void> {
+    await api.post(`${base(orgId)}/${boardId}/cards/${cardId}/comments`, { body })
+  },
+  async deleteComment(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    commentId: string
+  ): Promise<void> {
+    await api.delete(
+      `${base(orgId)}/${boardId}/cards/${cardId}/comments/${commentId}`
+    )
+  },
+
+  // --- Assignees ---
+  async listAssignees(
+    orgId: string,
+    boardId: string,
+    cardId: string
+  ): Promise<Assignee[]> {
+    const res = await api.get(
+      `${base(orgId)}/${boardId}/cards/${cardId}/assignees`
+    )
+    return res.data.data.assignees
+  },
+  async assignMember(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    userId: string
+  ): Promise<void> {
+    await api.post(`${base(orgId)}/${boardId}/cards/${cardId}/assignees`, {
+      userId,
+    })
+  },
+  async unassignMember(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    userId: string
+  ): Promise<void> {
+    await api.delete(
+      `${base(orgId)}/${boardId}/cards/${cardId}/assignees/${userId}`
+    )
+  },
+
+  // --- Labels (board-level + ติด/ถอดจากการ์ด) ---
+  async listBoardLabels(orgId: string, boardId: string): Promise<Label[]> {
+    const res = await api.get(`${base(orgId)}/${boardId}/labels`)
+    return res.data.data.labels
+  },
+  async createLabel(
+    orgId: string,
+    boardId: string,
+    data: { name: string; color: string }
+  ): Promise<Label> {
+    const res = await api.post(`${base(orgId)}/${boardId}/labels`, data)
+    return res.data.data.label
+  },
+  async listCardLabels(
+    orgId: string,
+    boardId: string,
+    cardId: string
+  ): Promise<Label[]> {
+    const res = await api.get(`${base(orgId)}/${boardId}/cards/${cardId}/labels`)
+    return res.data.data.labels
+  },
+  async attachLabel(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    labelId: string
+  ): Promise<void> {
+    await api.post(`${base(orgId)}/${boardId}/cards/${cardId}/labels`, {
+      labelId,
+    })
+  },
+  async detachLabel(
+    orgId: string,
+    boardId: string,
+    cardId: string,
+    labelId: string
+  ): Promise<void> {
+    await api.delete(
+      `${base(orgId)}/${boardId}/cards/${cardId}/labels/${labelId}`
+    )
   },
 }

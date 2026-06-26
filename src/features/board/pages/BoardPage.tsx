@@ -15,6 +15,7 @@ import {
 import { arrayMove } from "@dnd-kit/sortable"
 import { boardApi } from "../api/board.api"
 import { BoardColumn } from "../components/BoardColumn"
+import { CardDetailModal } from "../components/CardDetailModal"
 import type { Card } from "../types"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -80,6 +81,9 @@ export function BoardPage() {
 
   const [activeCard, setActiveCard] = useState<Card | null>(null)
   const startColRef = useRef<string | undefined>(undefined)
+
+  // การ์ดที่เปิด modal รายละเอียดอยู่ (null = ปิด)
+  const [openCardId, setOpenCardId] = useState<string | null>(null)
 
   const sensors = useSensors(
     // ต้องลากเกิน 5px ถึงเริ่ม drag → คลิกปุ่ม/ฟอร์มในการ์ดยังทำงานปกติ
@@ -213,6 +217,7 @@ export function BoardPage() {
                 boardId={boardId}
                 list={list}
                 cards={columns[list.id] ?? []}
+                onCardOpen={setOpenCardId}
               />
             ))}
 
@@ -248,6 +253,13 @@ export function BoardPage() {
           </DragOverlay>
         </DndContext>
       )}
+
+      <CardDetailModal
+        orgId={orgId}
+        boardId={boardId}
+        cardId={openCardId}
+        onClose={() => setOpenCardId(null)}
+      />
     </div>
   )
 }
