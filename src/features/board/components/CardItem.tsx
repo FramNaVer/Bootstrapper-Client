@@ -3,7 +3,7 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { cn } from "@/lib/utils"
 import type { Card } from "../types"
-import { Avatar, initials } from "./Avatar"
+import { Avatar, initials } from "@/shared/components/Avatar"
 
 // แปลงวันที่ครบกำหนดเป็นข้อความสั้น เช่น "30 มิ.ย."
 function formatDue(iso: string): string {

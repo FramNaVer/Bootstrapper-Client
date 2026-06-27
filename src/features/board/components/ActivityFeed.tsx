@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { boardApi } from "../api/board.api"
 import type { Activity, ActivityAction } from "../types"
-import { Avatar, initials } from "./Avatar"
+import { Avatar, initials } from "@/shared/components/Avatar"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

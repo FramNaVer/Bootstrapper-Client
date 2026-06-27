@@ -18,3 +18,14 @@ export interface Member {
   role: MembershipRole
   joinedAt: string
 }
+
+// คำเชิญที่ยังค้าง (PENDING)
+export interface Invitation {
+  id: string
+  organizationId: string
+  email: string
+  role: MembershipRole
+  status: string
+  expiresAt: string
+  createdAt: string
+}

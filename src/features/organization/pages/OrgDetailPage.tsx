@@ -1,13 +1,16 @@
 import { Link, useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { organizationApi } from "../api/organization.api"
+import { MembersDialog } from "../components/MembersDialog"
 import { boardApi } from "@/features/board/api/board.api"
 import { CreateBoardDialog } from "@/features/board/components/CreateBoardDialog"
+import { useAuth } from "@/features/auth/AuthContext"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { CardGridSkeleton } from "@/shared/components/CardGridSkeleton"
 
 export function OrgDetailPage() {
   const { orgId } = useParams() as { orgId: string }
+  const { user } = useAuth()
 
   // ชื่อ org ดึงจาก cache เดิม (หน้า list) ไม่ยิงซ้ำ
   const { data: organizations } = useQuery({
@@ -15,6 +18,7 @@ export function OrgDetailPage() {
     queryFn: organizationApi.list,
   })
   const org = organizations?.find((o) => o.id === orgId)
+  const canManage = org?.role === "OWNER" || org?.role === "ADMIN"
 
   const {
     data: boards,
@@ -33,7 +37,14 @@ export function OrgDetailPage() {
 
       <div className="mt-3 mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{org?.name ?? "องค์กร"}</h1>
-        <CreateBoardDialog orgId={orgId} />
+        <div className="flex items-center gap-2">
+          <MembersDialog
+            orgId={orgId}
+            currentUserId={user?.id ?? ""}
+            canManage={canManage}
+          />
+          <CreateBoardDialog orgId={orgId} />
+        </div>
       </div>
 
       {isLoading && <CardGridSkeleton count={3} />}

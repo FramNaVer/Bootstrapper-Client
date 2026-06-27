@@ -5,7 +5,7 @@ import { organizationApi } from "@/features/organization/api/organization.api"
 import { useAuth } from "@/features/auth/AuthContext"
 import { getApiErrorMessage } from "@/shared/api/errors"
 import type { Card } from "../types"
-import { Avatar, initials } from "./Avatar"
+import { Avatar, initials } from "@/shared/components/Avatar"
 import {
   Dialog,
   DialogContent,

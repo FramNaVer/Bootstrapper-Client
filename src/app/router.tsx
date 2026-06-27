@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { LoginPage } from "@/features/auth/pages/LoginPage"
 import { RegisterPage } from "@/features/auth/pages/RegisterPage"
 import { OAuthCallbackPage } from "@/features/auth/pages/OAuthCallbackPage"
+import { AcceptInvitationPage } from "@/features/auth/pages/AcceptInvitationPage"
 import { ProtectedRoute } from "@/features/auth/ProtectedRoute"
 import { AppLayout } from "@/shared/layout/AppLayout"
 import { OrganizationsPage } from "@/features/organization/pages/OrganizationsPage"
@@ -12,6 +13,8 @@ export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   { path: "/auth/callback", element: <OAuthCallbackPage /> },
+  // public: คนถูกเชิญเปิดลิงก์ — หน้านี้จัดการ login-redirect เอง (เก็บ token ไว้)
+  { path: "/accept-invitation", element: <AcceptInvitationPage /> },
 
   // กลุ่ม route ที่ต้อง login — ห่อด้วย AppLayout (header + outlet)
   {
