@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { tokenStorage } from "@/shared/api/tokenStorage"
 import { authApi } from "./api/auth.api"
 import type { AuthSession, User } from "./types"
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [status, setStatus] = useState<Status>("loading")
+  const queryClient = useQueryClient()
 
   // ตอนโหลดแอป: ถ้ามี token ค้างอยู่ ลองดึง /me เพื่อ rehydrate สถานะ login
   useEffect(() => {
@@ -48,12 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   function signInWithSession(session: AuthSession) {
+    // ล้าง cache ของผู้ใช้ก่อนหน้า (ถ้ามี) กันข้อมูลคนเก่าค้างให้คนใหม่เห็น
+    queryClient.clear()
     tokenStorage.set(session.accessToken, session.refreshToken)
     setUser(session.user)
     setStatus("authenticated")
   }
 
   async function hydrateFromTokens(accessToken: string, refreshToken: string) {
+    queryClient.clear()
     tokenStorage.set(accessToken, refreshToken)
     const u = await authApi.me()
     setUser(u)
@@ -67,6 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tokenStorage.clear()
     setUser(null)
     setStatus("unauthenticated")
+    // ทิ้ง query cache ทั้งหมด → คนถัดไปที่ login จะไม่เห็นข้อมูลของคนนี้
+    queryClient.clear()
   }
 
   return (

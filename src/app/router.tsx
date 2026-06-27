@@ -2,18 +2,33 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { LoginPage } from "@/features/auth/pages/LoginPage"
 import { RegisterPage } from "@/features/auth/pages/RegisterPage"
 import { OAuthCallbackPage } from "@/features/auth/pages/OAuthCallbackPage"
+import { AcceptInvitationPage } from "@/features/auth/pages/AcceptInvitationPage"
 import { ProtectedRoute } from "@/features/auth/ProtectedRoute"
-import { DashboardPage } from "@/features/dashboard/DashboardPage"
+import { AppLayout } from "@/shared/layout/AppLayout"
+import { OrganizationsPage } from "@/features/organization/pages/OrganizationsPage"
+import { OrgDetailPage } from "@/features/organization/pages/OrgDetailPage"
+import { BoardPage } from "@/features/board/pages/BoardPage"
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   { path: "/auth/callback", element: <OAuthCallbackPage /> },
+  // public: คนถูกเชิญเปิดลิงก์ — หน้านี้จัดการ login-redirect เอง (เก็บ token ไว้)
+  { path: "/accept-invitation", element: <AcceptInvitationPage /> },
 
-  // กลุ่ม route ที่ต้อง login
+  // กลุ่ม route ที่ต้อง login — ห่อด้วย AppLayout (header + outlet)
   {
     element: <ProtectedRoute />,
-    children: [{ path: "/", element: <DashboardPage /> }],
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { path: "/", element: <OrganizationsPage /> },
+          { path: "/org/:orgId", element: <OrgDetailPage /> },
+          { path: "/org/:orgId/board/:boardId", element: <BoardPage /> },
+        ],
+      },
+    ],
   },
 
   // ที่เหลือ → กลับหน้าแรก

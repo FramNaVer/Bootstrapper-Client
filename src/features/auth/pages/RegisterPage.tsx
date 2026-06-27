@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useMutation } from "@tanstack/react-query"
 import { authApi } from "../api/auth.api"
 import { getApiErrorMessage } from "@/shared/api/errors"
@@ -10,15 +10,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [displayName, setDisplayName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
+  // ส่งต่อ redirect (เช่นลิงก์รับคำเชิญ) ไปหน้า login หลังสมัครเสร็จ
+  const redirect = searchParams.get("redirect")
 
   const register = useMutation({
     mutationFn: () => authApi.register({ displayName, email, password }),
     onSuccess: () => {
       // backend ส่งอีเมลยืนยัน → ยังไม่ auto-login ให้ไปหน้า login พร้อมแจ้งเตือน
-      navigate("/login?registered=1", { replace: true })
+      const suffix = redirect
+        ? `&redirect=${encodeURIComponent(redirect)}`
+        : ""
+      navigate(`/login?registered=1${suffix}`, { replace: true })
     },
   })
 
@@ -83,7 +90,11 @@ export function RegisterPage() {
           <p className="text-muted-foreground mt-5 text-center text-sm">
             มีบัญชีอยู่แล้ว?{" "}
             <Link
-              to="/login"
+              to={
+                redirect
+                  ? `/login?redirect=${encodeURIComponent(redirect)}`
+                  : "/login"
+              }
               className="text-primary underline-offset-4 hover:underline"
             >
               เข้าสู่ระบบ
