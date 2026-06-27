@@ -42,6 +42,7 @@ export function OrgDetailPage() {
             orgId={orgId}
             currentUserId={user?.id ?? ""}
             canManage={canManage}
+            creatorId={org?.createdById}
           />
           <CreateBoardDialog orgId={orgId} />
         </div>

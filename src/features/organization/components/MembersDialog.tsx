@@ -20,9 +20,15 @@ interface Props {
   orgId: string
   currentUserId: string
   canManage: boolean // OWNER/ADMIN เท่านั้นที่เชิญ/เปลี่ยน role/ลบได้
+  creatorId?: string | null // ผู้ก่อตั้ง — ห้ามถูกใครจัดการ
 }
 
-export function MembersDialog({ orgId, currentUserId, canManage }: Props) {
+export function MembersDialog({
+  orgId,
+  currentUserId,
+  canManage,
+  creatorId,
+}: Props) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
@@ -108,6 +114,7 @@ export function MembersDialog({ orgId, currentUserId, canManage }: Props) {
           )}
           {(members.data ?? []).map((m) => {
             const isSelf = m.userId === currentUserId
+            const isCreator = !!creatorId && m.userId === creatorId
             return (
               <div key={m.userId} className="flex items-center gap-2.5">
                 <Avatar seed={m.userId} label={initials(m.displayName, m.email)} />
@@ -119,14 +126,19 @@ export function MembersDialog({ orgId, currentUserId, canManage }: Props) {
                         (คุณ)
                       </span>
                     )}
+                    {isCreator && (
+                      <span className="ml-1 text-xs text-amber-600">
+                        ★ ผู้ก่อตั้ง
+                      </span>
+                    )}
                   </div>
                   <div className="text-muted-foreground truncate text-xs">
                     {m.email}
                   </div>
                 </div>
 
-                {/* เปลี่ยน role/ลบ ได้เฉพาะ OWNER/ADMIN และไม่ใช่ตัวเอง */}
-                {canManage && !isSelf ? (
+                {/* เปลี่ยน role/ลบ ได้เฉพาะ OWNER/ADMIN, ไม่ใช่ตัวเอง, และไม่ใช่ผู้ก่อตั้ง */}
+                {canManage && !isSelf && !isCreator ? (
                   <>
                     <select
                       value={m.role}

@@ -6,6 +6,8 @@ export interface Organization {
   slug: string
   // role ของเราใน org นี้ — มาตอน list (create จะไม่มี)
   role?: MembershipRole
+  // userId ของผู้ก่อตั้ง — ใช้ปกป้อง/แสดงป้าย (org เก่าอาจเป็น null)
+  createdById?: string | null
   createdAt: string
   updatedAt: string
 }
