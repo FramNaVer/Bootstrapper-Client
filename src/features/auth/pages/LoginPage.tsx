@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useMutation } from "@tanstack/react-query"
 import { authApi } from "../api/auth.api"
 import { useAuth } from "../AuthContext"
@@ -13,15 +13,20 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { signInWithSession } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
+  // กลับไปหน้าที่ตั้งใจจะไป (เช่นลิงก์รับคำเชิญ) — รับเฉพาะ path ภายใน กัน open-redirect
+  const redirect = searchParams.get("redirect")
+  const dest = redirect && redirect.startsWith("/") ? redirect : "/"
 
   const login = useMutation({
     mutationFn: () => authApi.login({ email, password }),
     onSuccess: (session) => {
       signInWithSession(session)
-      navigate("/", { replace: true })
+      navigate(dest, { replace: true })
     },
   })
 
@@ -90,7 +95,11 @@ export function LoginPage() {
           <p className="text-muted-foreground text-center text-sm">
             ยังไม่มีบัญชี?{" "}
             <Link
-              to="/register"
+              to={
+                redirect
+                  ? `/register?redirect=${encodeURIComponent(redirect)}`
+                  : "/register"
+              }
               className="text-primary underline-offset-4 hover:underline"
             >
               สมัครสมาชิก
