@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { boardApi } from "../api/board.api"
+import { useBoardRealtime } from "../useBoardRealtime"
 import { BoardColumn } from "../components/BoardColumn"
 import { CardDetailModal } from "../components/CardDetailModal"
 import { ActivityFeed } from "../components/ActivityFeed"
@@ -52,6 +53,9 @@ export function BoardPage() {
     queryFn: () => boardApi.listCards(orgId, boardId),
   })
 
+  // real-time: คนอื่นเปลี่ยนบอร์ดนี้ → refetch อัตโนมัติ
+  useBoardRealtime(boardId)
+
   const sortedLists = useMemo(
     () => [...(lists.data ?? [])].sort((a, b) => a.position - b.position),
     [lists.data]
@@ -61,13 +65,16 @@ export function BoardPage() {
   // ใช้ ref คู่กัน เพื่อให้ handler อ่าน state ล่าสุดเสมอ (กัน stale closure ตอนลาก)
   const [columns, setColumns] = useState<Record<string, Card[]>>({})
   const columnsRef = useRef<Record<string, Card[]>>({})
+  // กำลังลากอยู่ไหม — กัน refetch (เช่นจาก real-time ของคนอื่น) มาทับ local state กลางคัน
+  const draggingRef = useRef(false)
   const commit = (next: Record<string, Card[]>) => {
     columnsRef.current = next
     setColumns(next)
   }
 
-  // sync จาก server → local ทุกครั้งที่ข้อมูลเปลี่ยน (สร้างการ์ด/หลัง move refetch)
+  // sync จาก server → local ทุกครั้งที่ข้อมูลเปลี่ยน (สร้างการ์ด/หลัง move refetch/real-time)
   useEffect(() => {
+    if (draggingRef.current) return // อยู่ระหว่างลาก → ข้ามไปก่อน (drag-end จะ refetch sync เอง)
     const grouped: Record<string, Card[]> = {}
     for (const list of lists.data ?? []) grouped[list.id] = []
     for (const c of cards.data ?? []) (grouped[c.listId] ??= []).push(c)
@@ -104,6 +111,7 @@ export function BoardPage() {
   })
 
   function handleDragStart(e: DragStartEvent) {
+    draggingRef.current = true
     const id = e.active.id as string
     const col = findColumn(id)
     startColRef.current = col
@@ -139,6 +147,7 @@ export function BoardPage() {
 
   function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e
+    draggingRef.current = false
     setActiveCard(null)
     if (!over) return
     const activeId = active.id as string
