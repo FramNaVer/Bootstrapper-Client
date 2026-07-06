@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router-dom"
 import { useAuth } from "@/features/auth/AuthContext"
+import { NotificationBell } from "@/features/notification/NotificationBell"
 import { Button } from "@/components/ui/button"
 
 // โครงหน้าหลังล็อกอิน: header (ชื่อแอป + user + logout) แล้วตามด้วยเนื้อหา (Outlet)
@@ -14,6 +15,7 @@ export function AppLayout() {
             Bootstrapper
           </Link>
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <span className="text-muted-foreground hidden text-sm sm:inline">
               {user?.displayName ?? user?.email}
             </span>
