@@ -14,10 +14,13 @@ import {
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { boardApi } from "../api/board.api"
+import { useBoardRealtime } from "../useBoardRealtime"
 import { BoardColumn } from "../components/BoardColumn"
 import { CardDetailModal } from "../components/CardDetailModal"
 import { ActivityFeed } from "../components/ActivityFeed"
 import type { Card } from "../types"
+import { useAuth } from "@/features/auth/AuthContext"
+import { Avatar, initials } from "@/shared/components/Avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -52,6 +55,12 @@ export function BoardPage() {
     queryFn: () => boardApi.listCards(orgId, boardId),
   })
 
+  // real-time: คนอื่นเปลี่ยนบอร์ดนี้ → refetch อัตโนมัติ + รายชื่อคนที่กำลังดูบอร์ด
+  const { user } = useAuth()
+  const presence = useBoardRealtime(boardId)
+  // โชว์เฉพาะ "คนอื่น" ที่กำลังดู (ตัดตัวเองออก)
+  const others = presence.filter((p) => p.userId !== user?.id)
+
   const sortedLists = useMemo(
     () => [...(lists.data ?? [])].sort((a, b) => a.position - b.position),
     [lists.data]
@@ -61,13 +70,16 @@ export function BoardPage() {
   // ใช้ ref คู่กัน เพื่อให้ handler อ่าน state ล่าสุดเสมอ (กัน stale closure ตอนลาก)
   const [columns, setColumns] = useState<Record<string, Card[]>>({})
   const columnsRef = useRef<Record<string, Card[]>>({})
+  // กำลังลากอยู่ไหม — กัน refetch (เช่นจาก real-time ของคนอื่น) มาทับ local state กลางคัน
+  const draggingRef = useRef(false)
   const commit = (next: Record<string, Card[]>) => {
     columnsRef.current = next
     setColumns(next)
   }
 
-  // sync จาก server → local ทุกครั้งที่ข้อมูลเปลี่ยน (สร้างการ์ด/หลัง move refetch)
+  // sync จาก server → local ทุกครั้งที่ข้อมูลเปลี่ยน (สร้างการ์ด/หลัง move refetch/real-time)
   useEffect(() => {
+    if (draggingRef.current) return // อยู่ระหว่างลาก → ข้ามไปก่อน (drag-end จะ refetch sync เอง)
     const grouped: Record<string, Card[]> = {}
     for (const list of lists.data ?? []) grouped[list.id] = []
     for (const c of cards.data ?? []) (grouped[c.listId] ??= []).push(c)
@@ -104,6 +116,7 @@ export function BoardPage() {
   })
 
   function handleDragStart(e: DragStartEvent) {
+    draggingRef.current = true
     const id = e.active.id as string
     const col = findColumn(id)
     startColRef.current = col
@@ -139,6 +152,7 @@ export function BoardPage() {
 
   function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e
+    draggingRef.current = false
     setActiveCard(null)
     if (!over) return
     const activeId = active.id as string
@@ -250,8 +264,30 @@ export function BoardPage() {
           </button>
         )}
 
-        {/* ประวัติ + ลบทั้งบอร์ด — ดันไปขวาสุด */}
-        <div className="ml-auto flex items-center gap-1">
+        {/* presence + ประวัติ + ลบทั้งบอร์ด — ดันไปขวาสุด */}
+        <div className="ml-auto flex items-center gap-2">
+          {others.length > 0 && (
+            <div className="flex -space-x-2 pr-1" title="กำลังดูบอร์ดนี้">
+              {others.slice(0, 5).map((u) => (
+                <span
+                  key={u.userId}
+                  className="ring-background rounded-full ring-2"
+                >
+                  <Avatar
+                    small
+                    seed={u.userId}
+                    label={initials(u.displayName, u.email)}
+                    title={u.displayName ?? u.email}
+                  />
+                </span>
+              ))}
+              {others.length > 5 && (
+                <span className="text-muted-foreground self-center pl-2 text-xs">
+                  +{others.length - 5}
+                </span>
+              )}
+            </div>
+          )}
           <ActivityFeed orgId={orgId} boardId={boardId} />
           {confirmDeleteBoard ? (
             <div className="flex items-center gap-2 text-sm">
