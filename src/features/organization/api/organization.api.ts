@@ -57,4 +57,12 @@ export const organizationApi = {
     const res = await api.post(`/invitations/accept`, { token })
     return res.data.data
   },
+
+  // รับคำเชิญจากกระดิ่งแจ้งเตือน — อ้างด้วย id ไม่ใช่ token
+  async acceptInvitationById(
+    invitationId: string
+  ): Promise<{ organizationId: string; role: MembershipRole }> {
+    const res = await api.post(`/invitations/${invitationId}/accept`)
+    return res.data.data
+  },
 }
