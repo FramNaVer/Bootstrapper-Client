@@ -22,6 +22,11 @@ export function OAuthCallbackPage() {
     const accessToken = params.get("accessToken")
     const refreshToken = params.get("refreshToken")
 
+    // ล้าง token ออกจาก URL ทันทีที่อ่านเข้าตัวแปรแล้ว — ไม่ให้ค้างใน
+    // address bar / browser history (เส้นทางสำเร็จมี navigate แทน entry ให้อยู่แล้ว
+    // แต่เส้นทาง error จะค้างถ้าไม่ล้างตรงนี้)
+    window.history.replaceState(null, "", window.location.pathname)
+
     if (!accessToken || !refreshToken) {
       setError(true)
       return
