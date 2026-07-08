@@ -32,4 +32,14 @@ export const authApi = {
   async resendVerification(email: string): Promise<void> {
     await api.post("/auth/resend-verification", { email })
   },
+
+  // ขอลิงก์รีเซ็ตรหัสผ่าน — backend ตอบเหมือนกันเสมอ (กัน enumeration)
+  async requestPasswordReset(email: string): Promise<void> {
+    await api.post("/auth/forgot-password", { email })
+  },
+
+  // ตั้งรหัสใหม่ด้วย token จากลิงก์ในเมล (สำเร็จแล้วทุก session เก่าถูกปิด)
+  async resetPassword(token: string, password: string): Promise<void> {
+    await api.post("/auth/reset-password", { token, password })
+  },
 }
