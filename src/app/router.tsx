@@ -4,6 +4,8 @@ import { RegisterPage } from "@/features/auth/pages/RegisterPage"
 import { OAuthCallbackPage } from "@/features/auth/pages/OAuthCallbackPage"
 import { AcceptInvitationPage } from "@/features/auth/pages/AcceptInvitationPage"
 import { VerifyEmailPage } from "@/features/auth/pages/VerifyEmailPage"
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage"
+import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage"
 import { ProtectedRoute } from "@/features/auth/ProtectedRoute"
 import { AppLayout } from "@/shared/layout/AppLayout"
 import { OrganizationsPage } from "@/features/organization/pages/OrganizationsPage"
@@ -18,6 +20,9 @@ export const router = createBrowserRouter([
   { path: "/accept-invitation", element: <AcceptInvitationPage /> },
   // public: ปลายทางลิงก์ยืนยันอีเมล (ยังไม่ login ก็เปิดได้)
   { path: "/verify-email", element: <VerifyEmailPage /> },
+  // public: ลืมรหัสผ่าน → ขอลิงก์ / ตั้งรหัสใหม่จากลิงก์ในเมล
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/reset-password", element: <ResetPasswordPage /> },
 
   // กลุ่ม route ที่ต้อง login — ห่อด้วย AppLayout (header + outlet)
   {

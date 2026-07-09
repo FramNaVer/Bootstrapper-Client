@@ -82,6 +82,12 @@ export function LoginPage() {
                 required
                 autoComplete="current-password"
               />
+              <Link
+                to="/forgot-password"
+                className="text-muted-foreground self-end text-xs underline-offset-4 hover:underline"
+              >
+                ลืมรหัสผ่าน?
+              </Link>
             </div>
 
             {login.isError && !notVerified && (
