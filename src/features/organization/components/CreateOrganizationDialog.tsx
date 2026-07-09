@@ -28,6 +28,7 @@ export function CreateOrganizationDialog() {
       setOpen(false)
       setName("")
     },
+    meta: { silent: true }, // error inline ใน dialog แล้ว
   })
 
   function onSubmit(e: FormEvent) {

@@ -31,6 +31,7 @@ export function LoginPage() {
       signInWithSession(session)
       navigate(dest, { replace: true })
     },
+    meta: { silent: true }, // error inline ในฟอร์มแล้ว (รวมเคสยังไม่ verify)
   })
 
   // login โดน 403 EMAIL_NOT_VERIFIED → แสดง UI เฉพาะ + ปุ่มขอเมลยืนยันใหม่

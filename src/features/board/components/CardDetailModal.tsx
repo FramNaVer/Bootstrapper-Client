@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { boardApi } from "../api/board.api"
 import { organizationApi } from "@/features/organization/api/organization.api"
 import { useAuth } from "@/features/auth/AuthContext"
@@ -109,6 +110,7 @@ function CardBody({
     mutationFn: () => boardApi.deleteCard(orgId, boardId, card.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+      toast.success("ลบการ์ดแล้ว")
       onClose()
     },
   })
@@ -507,6 +509,7 @@ function CommentSection({
       setBody("")
       refresh()
     },
+    meta: { silent: true }, // มี error inline ใต้ฟอร์มแล้ว — ไม่ต้อง toast ซ้ำ
   })
   const remove = useMutation({
     mutationFn: (commentId: string) =>

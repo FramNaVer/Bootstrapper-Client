@@ -62,6 +62,7 @@ export function NotificationBell() {
       setOpen(false)
       navigate(`/org/${res.organizationId}`)
     },
+    meta: { silent: true }, // error inline ใน dropdown แล้ว
   })
 
   function toggle() {

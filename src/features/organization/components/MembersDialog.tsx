@@ -48,14 +48,17 @@ export function MembersDialog({
   const refreshInvites = () =>
     queryClient.invalidateQueries({ queryKey: ["invitations", orgId] })
 
+  // สองตัวนี้มี error inline ใน dialog แล้ว → กัน toast ซ้ำ
   const changeRole = useMutation({
     mutationFn: (v: { userId: string; role: MembershipRole }) =>
       organizationApi.changeMemberRole(orgId, v.userId, v.role),
     onSuccess: refreshMembers,
+    meta: { silent: true },
   })
   const removeMember = useMutation({
     mutationFn: (userId: string) => organizationApi.removeMember(orgId, userId),
     onSuccess: refreshMembers,
+    meta: { silent: true },
   })
   const revoke = useMutation({
     mutationFn: (invitationId: string) =>
@@ -77,6 +80,7 @@ export function MembersDialog({
       setEmail("")
       refreshInvites()
     },
+    meta: { silent: true }, // error inline ใต้ฟอร์มเชิญแล้ว
   })
   function onInvite(e: FormEvent) {
     e.preventDefault()

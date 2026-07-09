@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
   DndContext,
   DragOverlay,
@@ -216,6 +217,7 @@ export function BoardPage() {
     mutationFn: () => boardApi.deleteBoard(orgId, boardId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boards", orgId] })
+      toast.success("ลบบอร์ดแล้ว")
       navigate(`/org/${orgId}`) // ลบทั้งบอร์ดแล้ว → กลับหน้า org
     },
   })

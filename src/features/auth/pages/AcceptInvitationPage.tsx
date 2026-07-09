@@ -21,6 +21,7 @@ export function AcceptInvitationPage() {
       // org ใหม่โผล่ในรายการ
       queryClient.invalidateQueries({ queryKey: ["organizations"] })
     },
+    meta: { silent: true }, // หน้านี้แสดงผลลัพธ์เต็มหน้าอยู่แล้ว
   })
 
   // login อยู่แล้ว + มี token → ยิงรับคำเชิญครั้งเดียว (ref กัน strict-mode ยิงซ้ำ)
