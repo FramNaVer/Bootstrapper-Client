@@ -19,6 +19,7 @@ export function ResetPasswordPage() {
 
   const reset = useMutation({
     mutationFn: () => authApi.resetPassword(token!, password),
+    meta: { silent: true }, // error inline ในฟอร์มแล้ว
   })
 
   function onSubmit(e: FormEvent) {

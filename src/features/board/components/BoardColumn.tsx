@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { useDroppable } from "@dnd-kit/core"
 import {
   SortableContext,
@@ -55,6 +56,7 @@ export function BoardColumn({ orgId, boardId, list, cards, onCardOpen }: Props) 
       // ลบคอลัมน์ → การ์ดข้างในหายด้วย (cascade) → refresh ทั้งคู่
       queryClient.invalidateQueries({ queryKey: ["lists", boardId] })
       queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+      toast.success(`ลบลิสต์ "${list.name}" แล้ว`)
     },
   })
 

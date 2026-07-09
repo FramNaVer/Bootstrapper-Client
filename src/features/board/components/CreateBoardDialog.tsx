@@ -26,6 +26,7 @@ export function CreateBoardDialog({ orgId }: { orgId: string }) {
       setOpen(false)
       setName("")
     },
+    meta: { silent: true }, // error inline ใน dialog แล้ว
   })
 
   function onSubmit(e: FormEvent) {
