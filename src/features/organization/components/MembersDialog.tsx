@@ -131,7 +131,7 @@ export function MembersDialog({
                       </span>
                     )}
                     {isCreator && (
-                      <span className="ml-1 text-xs text-amber-600">
+                      <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">
                         ★ ผู้ก่อตั้ง
                       </span>
                     )}

@@ -1,11 +1,12 @@
 import { Link, useMatch } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { LogOut, Plus } from "lucide-react"
+import { LogOut, Moon, Plus, Sun } from "lucide-react"
 import { organizationApi } from "@/features/organization/api/organization.api"
 import { boardApi } from "@/features/board/api/board.api"
 import { CreateBoardDialog } from "@/features/board/components/CreateBoardDialog"
 import { NotificationBell } from "@/features/notification/NotificationBell"
 import { useAuth } from "@/features/auth/AuthContext"
+import { useTheme } from "@/shared/theme/ThemeProvider"
 import { Avatar, initials } from "@/shared/components/Avatar"
 import { cn } from "@/lib/utils"
 
@@ -95,13 +96,14 @@ export function OrgSidebar() {
   )
 }
 
-// การ์ดผู้ใช้มุมล่างซ้าย: avatar + ชื่อ + กระดิ่ง + ออกจากระบบ
+// การ์ดผู้ใช้มุมล่างซ้าย: avatar + ชื่อ + สลับธีม + กระดิ่ง + ออกจากระบบ
 function UserCard() {
   const { user, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   if (!user) return null
 
   return (
-    <div className="bg-secondary/40 flex items-center gap-2 border-t p-2">
+    <div className="bg-secondary/40 flex items-center gap-1.5 border-t p-2">
       <Avatar seed={user.id} label={initials(user.displayName, user.email)} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">
@@ -111,6 +113,17 @@ function UserCard() {
           <p className="text-muted-foreground truncate text-xs">{user.email}</p>
         )}
       </div>
+      <button
+        title={theme === "dark" ? "สลับเป็นโหมดสว่าง" : "สลับเป็นโหมดมืด"}
+        onClick={toggleTheme}
+        className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-2"
+      >
+        {theme === "dark" ? (
+          <Sun className="size-4" />
+        ) : (
+          <Moon className="size-4" />
+        )}
+      </button>
       {/* มือถือใช้กระดิ่งบน top bar แทน (ใน drawer แคบ dropdown จะล้นจอ) */}
       <div className="hidden md:block">
         <NotificationBell dropUp />
