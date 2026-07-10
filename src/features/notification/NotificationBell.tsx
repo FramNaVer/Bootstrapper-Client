@@ -8,6 +8,7 @@ import { organizationApi } from "@/features/organization/api/organization.api"
 import { getSocket } from "@/shared/realtime/socket"
 import { getApiErrorMessage } from "@/shared/api/errors"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 function timeAgo(iso: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -18,7 +19,8 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)} วันที่แล้ว`
 }
 
-export function NotificationBell() {
+// dropUp: กระดิ่งอยู่มุมล่างของจอ (user card) → dropdown ต้องกางขึ้นแทนกางลง
+export function NotificationBell({ dropUp = false }: { dropUp?: boolean }) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -90,7 +92,12 @@ export function NotificationBell() {
         <>
           {/* คลิกนอกพื้นที่ → ปิด */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="bg-card absolute right-0 z-50 mt-2 w-80 rounded-lg border shadow-lg">
+          <div
+            className={cn(
+              "bg-card absolute z-50 w-80 rounded-lg border shadow-lg",
+              dropUp ? "bottom-full left-0 mb-2" : "right-0 mt-2"
+            )}
+          >
             <div className="border-b px-4 py-2 text-sm font-semibold">
               การแจ้งเตือน
             </div>

@@ -235,7 +235,8 @@ export function BoardPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-57px)] flex-col">
+    // h-full = เต็มพื้นที่ main ของ shell (เลิก hardcode ความสูง header เดิม)
+    <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 px-6 py-3">
         <Link
           to={`/org/${orgId}`}
