@@ -54,7 +54,18 @@ export function CardDetailModal({ orgId, boardId, cardId, onClose }: ModalProps)
         {/* DialogTitle ซ่อนไว้เพื่อ accessibility — หัวเรื่องจริงคือ input แก้ชื่อด้านล่าง */}
         <DialogTitle className="sr-only">รายละเอียดการ์ด</DialogTitle>
 
-        {!card.data ? (
+        {card.isError ? (
+          // เข้าถึงได้ผ่าน deep link (?card=) ที่ชี้การ์ดซึ่งถูกลบ/ไม่มีสิทธิ์
+          // — จากบนบอร์ดเองเปิดได้เฉพาะการ์ดที่ยังอยู่ เคสนี้เลยไม่เคยเกิด
+          <div className="flex flex-col items-start gap-3 py-2">
+            <p className="text-muted-foreground text-sm">
+              ไม่พบการ์ดนี้ — อาจถูกลบไปแล้ว
+            </p>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              ปิด
+            </Button>
+          </div>
+        ) : !card.data ? (
           <div className="flex flex-col gap-4">
             <Skeleton className="h-8 w-2/3" />
             <Skeleton className="h-24 w-full" />

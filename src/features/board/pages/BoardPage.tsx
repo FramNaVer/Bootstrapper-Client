@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
@@ -99,6 +99,18 @@ export function BoardPage() {
 
   // การ์ดที่เปิด modal รายละเอียดอยู่ (null = ปิด)
   const [openCardId, setOpenCardId] = useState<string | null>(null)
+
+  // deep link: /org/../board/..?card=<id> (มาจากปฏิทิน — อนาคตใช้กับแจ้งเตือนได้)
+  // เปิด modal แล้วล้าง param ทิ้งทันทีด้วย replace: ปิด modal/refresh จะได้ไม่เด้งซ้ำ
+  // และปุ่ม back ไม่ต้องเจอ URL ที่มี ?card= ค้างเป็น step เพิ่ม
+  const [searchParams, setSearchParams] = useSearchParams()
+  useEffect(() => {
+    const cardId = searchParams.get("card")
+    if (cardId) {
+      setOpenCardId(cardId)
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const sensors = useSensors(
     // ต้องลากเกิน 5px ถึงเริ่ม drag → คลิกปุ่ม/ฟอร์มในการ์ดยังทำงานปกติ

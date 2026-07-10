@@ -21,6 +21,17 @@ export interface Member {
   joinedAt: string
 }
 
+// การ์ดบนปฏิทินรวมของ org (จาก GET /organizations/:orgId/cards)
+// — ต่างจาก Card ของ board ตรงที่แนบ boardName มาบอกว่ามาจากบอร์ดไหน
+export interface DueCard {
+  id: string
+  boardId: string
+  listId: string
+  title: string
+  dueDate: string
+  boardName: string
+}
+
 // คำเชิญที่ยังค้าง (PENDING)
 export interface Invitation {
   id: string
