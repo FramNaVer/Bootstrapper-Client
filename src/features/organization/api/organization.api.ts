@@ -1,5 +1,11 @@
 import { api } from "@/shared/api/client"
-import type { Invitation, Member, MembershipRole, Organization } from "../types"
+import type {
+  DueCard,
+  Invitation,
+  Member,
+  MembershipRole,
+  Organization,
+} from "../types"
 
 export const organizationApi = {
   // org ทั้งหมดที่เราเป็นสมาชิก (พร้อม role)
@@ -27,6 +33,18 @@ export const organizationApi = {
   },
   async removeMember(orgId: string, userId: string): Promise<void> {
     await api.delete(`/organizations/${orgId}/members/${userId}`)
+  },
+
+  // ปฏิทินรวม: การ์ดทุกบอร์ดที่มีกำหนดส่งในช่วง [dueFrom, dueTo] (YYYY-MM-DD)
+  async listDueCards(
+    orgId: string,
+    dueFrom: string,
+    dueTo: string
+  ): Promise<DueCard[]> {
+    const res = await api.get(`/organizations/${orgId}/cards`, {
+      params: { dueFrom, dueTo },
+    })
+    return res.data.data.cards
   },
 
   // --- Invitations ---

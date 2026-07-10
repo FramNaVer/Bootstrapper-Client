@@ -8,6 +8,7 @@ import { AxiosError } from "axios"
 import { Toaster, toast } from "sonner"
 import { CircleCheck, CircleX } from "lucide-react"
 import { AuthProvider } from "@/features/auth/AuthContext"
+import { ThemeProvider } from "@/shared/theme/ThemeProvider"
 import { getApiErrorMessage } from "@/shared/api/errors"
 import { router } from "@/app/router"
 
@@ -47,33 +48,38 @@ const queryClient = new QueryClient({
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        {/* toast ทั้งแอป — ขวาบน (มุมเดียวกับกระดิ่ง = feedback มาจากทิศเดียวกัน)
-            สไตล์: การ์ดพื้นระบบ + แถบสีซ้ายบอกชนิด + ไอคอนวงกลม + ปุ่มปิดขวา
-            ใช้ token สี (bg-card ฯลฯ) → รองรับ dark mode ที่จะทำในเฟสธีมอัตโนมัติ */}
-        <Toaster
-          position="top-right"
-          closeButton
-          icons={{
-            success: <CircleCheck className="size-5 fill-green-500 text-white" />,
-            error: <CircleX className="size-5 fill-red-500 text-white" />,
-          }}
-          toastOptions={{
-            classNames: {
-              toast:
-                "!bg-card !text-foreground !border !border-border !border-l-4 !rounded-lg !shadow-lg !gap-3 !items-center",
-              title: "!font-semibold !text-sm",
-              description: "!text-muted-foreground !text-xs",
-              success:
-                "!border-l-green-500 [&_[data-title]]:!text-green-700",
-              error: "!border-l-red-500 [&_[data-title]]:!text-red-700",
-              closeButton:
-                "!static !order-last !ml-auto !bg-transparent !border-none !text-muted-foreground hover:!text-foreground !transform-none",
-            },
-          }}
-        />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <RouterProvider router={router} />
+          {/* toast ทั้งแอป — ขวาบน (มุมเดียวกับกระดิ่ง = feedback มาจากทิศเดียวกัน)
+              สไตล์: การ์ดพื้นระบบ + แถบสีซ้ายบอกชนิด + ไอคอนวงกลม + ปุ่มปิดขวา
+              สีหัวข้อมี dark: variant — เขียว/แดงโทนเข้มจะจมหายบนพื้นมืด */}
+          <Toaster
+            position="top-right"
+            closeButton
+            icons={{
+              success: (
+                <CircleCheck className="size-5 fill-green-500 text-white" />
+              ),
+              error: <CircleX className="size-5 fill-red-500 text-white" />,
+            }}
+            toastOptions={{
+              classNames: {
+                toast:
+                  "!bg-card !text-foreground !border !border-border !border-l-4 !rounded-lg !shadow-lg !gap-3 !items-center",
+                title: "!font-semibold !text-sm",
+                description: "!text-muted-foreground !text-xs",
+                success:
+                  "!border-l-green-500 [&_[data-title]]:!text-green-700 dark:[&_[data-title]]:!text-green-400",
+                error:
+                  "!border-l-red-500 [&_[data-title]]:!text-red-700 dark:[&_[data-title]]:!text-red-400",
+                closeButton:
+                  "!static !order-last !ml-auto !bg-transparent !border-none !text-muted-foreground hover:!text-foreground !transform-none",
+              },
+            }}
+          />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }
