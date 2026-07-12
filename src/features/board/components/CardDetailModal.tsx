@@ -153,6 +153,7 @@ function CardBody({
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") saveTitle()
+            if (e.key === "Escape") setTitle(card.title) // กติกาเดียวกับ rename อื่นทั้งแอป
           }}
           className="hover:border-input h-auto border-transparent px-1 py-0.5 text-lg font-semibold shadow-none"
         />

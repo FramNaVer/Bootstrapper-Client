@@ -5,7 +5,8 @@ import { toast } from "sonner"
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -113,8 +114,11 @@ export function BoardPage() {
   }, [searchParams, setSearchParams])
 
   const sensors = useSensors(
-    // ต้องลากเกิน 5px ถึงเริ่ม drag → คลิกปุ่ม/ฟอร์มในการ์ดยังทำงานปกติ
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    // เมาส์: ลากเกิน 5px ถึงเริ่ม drag → คลิกปุ่ม/ฟอร์มในการ์ดยังทำงานปกติ
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    // จอสัมผัส: "กดค้าง 250ms" ถึงเริ่มลาก (แบบ Trello) — ถ้าใช้เงื่อนไข
+    // ระยะทางแบบเมาส์ การปัดเพื่อเลื่อนบอร์ดจะกลายเป็นการลากการ์ดทันที
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } })
   )
 
   const move = useMutation({
@@ -249,7 +253,8 @@ export function BoardPage() {
   return (
     // h-full = เต็มพื้นที่ main ของ shell (เลิก hardcode ความสูง header เดิม)
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 px-6 py-3">
+      {/* flex-wrap: จอแคบให้ปุ่มชุดขวา (ประวัติ/ลบ) ตกบรรทัดใหม่แทนที่จะล้นจอ */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 sm:px-6">
         <Link
           to={`/org/${orgId}`}
           className="text-muted-foreground text-sm hover:underline"
@@ -272,7 +277,7 @@ export function BoardPage() {
         ) : (
           <button
             onClick={startRenameBoard}
-            className="text-lg font-semibold hover:underline"
+            className="max-w-full truncate text-lg font-semibold hover:underline"
             title="คลิกเพื่อเปลี่ยนชื่อบอร์ด"
           >
             {board.data?.name ?? "บอร์ด"}
@@ -281,8 +286,9 @@ export function BoardPage() {
 
         {/* presence + ประวัติ + ลบทั้งบอร์ด — ดันไปขวาสุด */}
         <div className="ml-auto flex items-center gap-2">
+          {/* presence ซ่อนบนจอแคบ — พื้นที่น้อย และมือถือมักดูคนเดียว */}
           {others.length > 0 && (
-            <div className="flex -space-x-2 pr-1" title="กำลังดูบอร์ดนี้">
+            <div className="hidden -space-x-2 pr-1 sm:flex" title="กำลังดูบอร์ดนี้">
               {others.slice(0, 5).map((u) => (
                 <span
                   key={u.userId}
@@ -339,7 +345,7 @@ export function BoardPage() {
       {lists.isError && <p className="text-destructive px-6">โหลดบอร์ดไม่สำเร็จ</p>}
 
       {lists.isLoading ? (
-        <div className="flex gap-4 px-6">
+        <div className="flex gap-4 px-3 sm:px-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-64 w-72 rounded-lg" />
           ))}
@@ -352,7 +358,7 @@ export function BoardPage() {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex flex-1 items-start gap-4 overflow-x-auto px-6 pb-6">
+          <div className="flex flex-1 items-start gap-4 overflow-x-auto px-3 pb-4 sm:px-6 sm:pb-6">
             {sortedLists.map((list) => (
               <BoardColumn
                 key={list.id}
@@ -368,6 +374,13 @@ export function BoardPage() {
               onSubmit={addList}
               className="bg-card/40 w-72 shrink-0 rounded-lg border border-dashed p-3"
             >
+              {/* บอร์ดเปล่า: บอกก้าวแรกให้ชัด แทนที่จะเจอแค่ช่อง input ลอยๆ */}
+              {sortedLists.length === 0 && !lists.isLoading && (
+                <p className="text-muted-foreground mb-2 text-sm">
+                  บอร์ดยังว่างอยู่ — เริ่มจากสร้างคอลัมน์แรก เช่น "To Do",
+                  "กำลังทำ", "เสร็จแล้ว" แล้วค่อยเพิ่มการ์ดงานเข้าไป
+                </p>
+              )}
               <Input
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
