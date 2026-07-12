@@ -51,10 +51,9 @@ export function NotificationBell({ dropUp = false }: { dropUp?: boolean }) {
 
   const accept = useMutation({
     mutationFn: async (n: AppNotification) => {
-      // เส้นทางหลัก: invitationId / fallback: token (notification เก่าก่อนเปลี่ยน payload)
-      const res = n.payload?.invitationId
-        ? await organizationApi.acceptInvitationById(n.payload.invitationId)
-        : await organizationApi.acceptInvitation(n.payload!.token!)
+      const res = await organizationApi.acceptInvitationById(
+        n.payload!.invitationId!
+      )
       await notificationApi.markRead(n.id)
       return res
     },
@@ -137,10 +136,7 @@ export function NotificationBell({ dropUp = false }: { dropUp?: boolean }) {
                         <Button
                           size="sm"
                           className="h-7 px-3 text-xs"
-                          disabled={
-                            accept.isPending ||
-                            (!n.payload?.invitationId && !n.payload?.token)
-                          }
+                          disabled={accept.isPending || !n.payload?.invitationId}
                           onClick={() => accept.mutate(n)}
                         >
                           เข้าร่วม

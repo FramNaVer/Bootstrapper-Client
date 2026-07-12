@@ -102,10 +102,13 @@ function CardBody({
   const [description, setDescription] = useState(card.description ?? "")
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  // หลังแก้การ์ด: refresh ทั้ง detail (modal) และ list (คอลัมน์บนบอร์ด)
+  // หลังแก้การ์ด: refresh detail (modal), list (คอลัมน์บนบอร์ด),
+  // และปฏิทินของ org — key ["due-cards"] เฉยๆ จับทุก query ที่ขึ้นต้นด้วยมัน
+  // (ทุกเดือน/ทุก org) เพราะ invalidateQueries เทียบแบบ prefix
   const invalidateCard = () => {
     queryClient.invalidateQueries({ queryKey: ["card", card.id] })
     queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+    queryClient.invalidateQueries({ queryKey: ["due-cards"] })
   }
 
   const update = useMutation({
@@ -121,6 +124,8 @@ function CardBody({
     mutationFn: () => boardApi.deleteCard(orgId, boardId, card.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+      // การ์ดที่มีกำหนดส่งต้องหายจากปฏิทินด้วย
+      queryClient.invalidateQueries({ queryKey: ["due-cards"] })
       toast.success("ลบการ์ดแล้ว")
       onClose()
     },
@@ -148,6 +153,7 @@ function CardBody({
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") saveTitle()
+            if (e.key === "Escape") setTitle(card.title) // กติกาเดียวกับ rename อื่นทั้งแอป
           }}
           className="hover:border-input h-auto border-transparent px-1 py-0.5 text-lg font-semibold shadow-none"
         />

@@ -1,6 +1,6 @@
 import { Link, useMatch } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { LogOut, Moon, Plus, Sun } from "lucide-react"
+import { LogOut, MessageSquare, Moon, Plus, Sun } from "lucide-react"
 import { organizationApi } from "@/features/organization/api/organization.api"
 import { boardApi } from "@/features/board/api/board.api"
 import { CreateBoardDialog } from "@/features/board/components/CreateBoardDialog"
@@ -15,8 +15,10 @@ import { cn } from "@/lib/utils"
 export function OrgSidebar() {
   const orgMatch = useMatch("/org/:orgId/*")
   const boardMatch = useMatch("/org/:orgId/board/:boardId")
+  const chatMatch = useMatch("/org/:orgId/chat")
   const orgId = orgMatch?.params.orgId
   const activeBoardId = boardMatch?.params.boardId
+  const chatActive = !!chatMatch
 
   const { data: organizations } = useQuery({
     queryKey: ["organizations"],
@@ -86,7 +88,21 @@ export function OrgSidebar() {
                 </li>
               ))}
             </ul>
-            {/* เฟส 2.3: section "แชท" ของ org จะเพิ่มต่อจากรายการบอร์ดตรงนี้ */}
+            {/* แชท — หนึ่ง org มีห้องเดียว (v1) */}
+            <div className="text-muted-foreground mt-4 mb-1 px-2 text-xs font-semibold tracking-wide uppercase">
+              แชท
+            </div>
+            <Link
+              to={`/org/${orgId}/chat`}
+              className={cn(
+                "flex items-center gap-1.5 truncate rounded-md px-2 py-1.5 text-sm",
+                chatActive
+                  ? "bg-accent text-foreground font-medium"
+                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+              )}
+            >
+              <MessageSquare className="size-3.5 shrink-0" /> ห้องแชท
+            </Link>
           </div>
         </>
       )}

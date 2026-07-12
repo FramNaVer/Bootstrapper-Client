@@ -56,7 +56,9 @@ export function CardItem({
         }
       }}
       className={cn(
-        "bg-background border-border touch-none rounded-md border p-2.5 shadow-sm",
+        // touch-manipulation (ไม่ใช่ touch-none): นิ้วปัดบนการ์ด = เลื่อนบอร์ดได้ปกติ
+        // การลากบนมือถือใช้กดค้างผ่าน TouchSensor แทน (ดู sensors ใน BoardPage)
+        "bg-background border-border touch-manipulation rounded-md border p-2.5 shadow-sm",
         isDragging ? "opacity-50" : "cursor-grab"
       )}
     >

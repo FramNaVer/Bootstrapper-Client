@@ -64,6 +64,11 @@ const BoardPage = lazy(() =>
     default: m.BoardPage,
   }))
 )
+const ChatPage = lazy(() =>
+  import("@/features/chat/pages/ChatPage").then((m) => ({
+    default: m.ChatPage,
+  }))
+)
 
 // จอระหว่างรอโหลด chunk — เห็นแว้บเดียวเฉพาะครั้งแรกที่เปิดหน้านั้น
 // (ครั้งถัดไป chunk อยู่ใน cache ของเบราว์เซอร์แล้ว)
@@ -101,6 +106,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/", element: page(<OrganizationsPage />) },
           { path: "/org/:orgId", element: page(<OrgDetailPage />) },
+          { path: "/org/:orgId/chat", element: page(<ChatPage />) },
           { path: "/org/:orgId/board/:boardId", element: page(<BoardPage />) },
         ],
       },
