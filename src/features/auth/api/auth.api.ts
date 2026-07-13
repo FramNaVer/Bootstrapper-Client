@@ -19,8 +19,9 @@ export const authApi = {
     return res.data.data.user
   },
 
-  async logout(refreshToken: string): Promise<void> {
-    await api.post("/auth/logout", { refreshToken })
+  // refresh token ไปกับ httpOnly cookie (เบราว์เซอร์แนบเอง) — ไม่ต้องส่งอะไรใน body
+  async logout(): Promise<void> {
+    await api.post("/auth/logout", {})
   },
 
   // ยืนยันอีเมลด้วย token จากลิงก์ในเมล

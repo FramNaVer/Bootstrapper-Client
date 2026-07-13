@@ -4,12 +4,15 @@ import { useAuth } from "../AuthContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-// ปลายทางที่ backend redirect กลับมาหลัง OAuth สำเร็จ:
-//   /auth/callback#accessToken=...&refreshToken=...
-// เราอ่าน token จาก hash (#...) เก็บลง storage แล้วดึง /me เพื่อ login
+// ปลายทางที่ backend redirect กลับมาหลัง OAuth สำเร็จ
+//
+// P4: refresh token มาเป็น httpOnly cookie ตั้งแต่ตอน redirect แล้ว —
+// หน้านี้แค่เรียก /refresh (cookie → access token) แล้วดึง /me
+// token ใน hash (ที่ backend ยังส่งช่วงเปลี่ยนผ่านให้ client รุ่นเดิม)
+// ถูก "ล้างทิ้งโดยไม่อ่าน" — พอถึงขั้น contract URL จะสะอาดตั้งแต่ต้นทาง
 export function OAuthCallbackPage() {
   const navigate = useNavigate()
-  const { hydrateFromTokens } = useAuth()
+  const { hydrateFromOAuth } = useAuth()
   const [error, setError] = useState(false)
   // กัน effect ทำงานซ้ำ (React 18 StrictMode เรียก effect 2 รอบใน dev)
   const done = useRef(false)
@@ -18,24 +21,13 @@ export function OAuthCallbackPage() {
     if (done.current) return
     done.current = true
 
-    const params = new URLSearchParams(window.location.hash.slice(1))
-    const accessToken = params.get("accessToken")
-    const refreshToken = params.get("refreshToken")
-
-    // ล้าง token ออกจาก URL ทันทีที่อ่านเข้าตัวแปรแล้ว — ไม่ให้ค้างใน
-    // address bar / browser history (เส้นทางสำเร็จมี navigate แทน entry ให้อยู่แล้ว
-    // แต่เส้นทาง error จะค้างถ้าไม่ล้างตรงนี้)
+    // ล้าง token ออกจาก URL ทันที — ไม่ให้ค้างใน address bar / history
     window.history.replaceState(null, "", window.location.pathname)
 
-    if (!accessToken || !refreshToken) {
-      setError(true)
-      return
-    }
-
-    hydrateFromTokens(accessToken, refreshToken)
+    hydrateFromOAuth()
       .then(() => navigate("/", { replace: true }))
       .catch(() => setError(true))
-  }, [hydrateFromTokens, navigate])
+  }, [hydrateFromOAuth, navigate])
 
   if (error) {
     return (
