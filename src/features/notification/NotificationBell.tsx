@@ -8,6 +8,7 @@ import { organizationApi } from "@/features/organization/api/organization.api"
 import { getSocket } from "@/shared/realtime/socket"
 import { getApiErrorMessage } from "@/shared/api/errors"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 function timeAgo(iso: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -18,7 +19,8 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)} วันที่แล้ว`
 }
 
-export function NotificationBell() {
+// dropUp: กระดิ่งอยู่มุมล่างของจอ (user card) → dropdown ต้องกางขึ้นแทนกางลง
+export function NotificationBell({ dropUp = false }: { dropUp?: boolean }) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -49,10 +51,9 @@ export function NotificationBell() {
 
   const accept = useMutation({
     mutationFn: async (n: AppNotification) => {
-      // เส้นทางหลัก: invitationId / fallback: token (notification เก่าก่อนเปลี่ยน payload)
-      const res = n.payload?.invitationId
-        ? await organizationApi.acceptInvitationById(n.payload.invitationId)
-        : await organizationApi.acceptInvitation(n.payload!.token!)
+      const res = await organizationApi.acceptInvitationById(
+        n.payload!.invitationId!
+      )
       await notificationApi.markRead(n.id)
       return res
     },
@@ -62,6 +63,7 @@ export function NotificationBell() {
       setOpen(false)
       navigate(`/org/${res.organizationId}`)
     },
+    meta: { silent: true }, // error inline ใน dropdown แล้ว
   })
 
   function toggle() {
@@ -89,7 +91,12 @@ export function NotificationBell() {
         <>
           {/* คลิกนอกพื้นที่ → ปิด */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="bg-card absolute right-0 z-50 mt-2 w-80 rounded-lg border shadow-lg">
+          <div
+            className={cn(
+              "bg-card absolute z-50 w-80 rounded-lg border shadow-lg",
+              dropUp ? "bottom-full left-0 mb-2" : "right-0 mt-2"
+            )}
+          >
             <div className="border-b px-4 py-2 text-sm font-semibold">
               การแจ้งเตือน
             </div>
@@ -129,10 +136,7 @@ export function NotificationBell() {
                         <Button
                           size="sm"
                           className="h-7 px-3 text-xs"
-                          disabled={
-                            accept.isPending ||
-                            (!n.payload?.invitationId && !n.payload?.token)
-                          }
+                          disabled={accept.isPending || !n.payload?.invitationId}
                           onClick={() => accept.mutate(n)}
                         >
                           เข้าร่วม

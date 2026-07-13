@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { boardApi } from "../api/board.api"
 import { organizationApi } from "@/features/organization/api/organization.api"
 import { useAuth } from "@/features/auth/AuthContext"
@@ -53,7 +54,18 @@ export function CardDetailModal({ orgId, boardId, cardId, onClose }: ModalProps)
         {/* DialogTitle ซ่อนไว้เพื่อ accessibility — หัวเรื่องจริงคือ input แก้ชื่อด้านล่าง */}
         <DialogTitle className="sr-only">รายละเอียดการ์ด</DialogTitle>
 
-        {!card.data ? (
+        {card.isError ? (
+          // เข้าถึงได้ผ่าน deep link (?card=) ที่ชี้การ์ดซึ่งถูกลบ/ไม่มีสิทธิ์
+          // — จากบนบอร์ดเองเปิดได้เฉพาะการ์ดที่ยังอยู่ เคสนี้เลยไม่เคยเกิด
+          <div className="flex flex-col items-start gap-3 py-2">
+            <p className="text-muted-foreground text-sm">
+              ไม่พบการ์ดนี้ — อาจถูกลบไปแล้ว
+            </p>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              ปิด
+            </Button>
+          </div>
+        ) : !card.data ? (
           <div className="flex flex-col gap-4">
             <Skeleton className="h-8 w-2/3" />
             <Skeleton className="h-24 w-full" />
@@ -90,10 +102,13 @@ function CardBody({
   const [description, setDescription] = useState(card.description ?? "")
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  // หลังแก้การ์ด: refresh ทั้ง detail (modal) และ list (คอลัมน์บนบอร์ด)
+  // หลังแก้การ์ด: refresh detail (modal), list (คอลัมน์บนบอร์ด),
+  // และปฏิทินของ org — key ["due-cards"] เฉยๆ จับทุก query ที่ขึ้นต้นด้วยมัน
+  // (ทุกเดือน/ทุก org) เพราะ invalidateQueries เทียบแบบ prefix
   const invalidateCard = () => {
     queryClient.invalidateQueries({ queryKey: ["card", card.id] })
     queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+    queryClient.invalidateQueries({ queryKey: ["due-cards"] })
   }
 
   const update = useMutation({
@@ -109,6 +124,9 @@ function CardBody({
     mutationFn: () => boardApi.deleteCard(orgId, boardId, card.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards", boardId] })
+      // การ์ดที่มีกำหนดส่งต้องหายจากปฏิทินด้วย
+      queryClient.invalidateQueries({ queryKey: ["due-cards"] })
+      toast.success("ลบการ์ดแล้ว")
       onClose()
     },
   })
@@ -135,6 +153,7 @@ function CardBody({
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") saveTitle()
+            if (e.key === "Escape") setTitle(card.title) // กติกาเดียวกับ rename อื่นทั้งแอป
           }}
           className="hover:border-input h-auto border-transparent px-1 py-0.5 text-lg font-semibold shadow-none"
         />
@@ -507,6 +526,7 @@ function CommentSection({
       setBody("")
       refresh()
     },
+    meta: { silent: true }, // มี error inline ใต้ฟอร์มแล้ว — ไม่ต้อง toast ซ้ำ
   })
   const remove = useMutation({
     mutationFn: (commentId: string) =>

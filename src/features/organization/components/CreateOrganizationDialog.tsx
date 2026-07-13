@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react"
+import { useState, type FormEvent, type ReactNode } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { organizationApi } from "../api/organization.api"
 import { getApiErrorMessage } from "@/shared/api/errors"
@@ -15,7 +15,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-export function CreateOrganizationDialog() {
+// trigger: ปุ่มเปิด dialog กำหนดเองได้ (เช่นปุ่ม + กลมใน rail) — ไม่ส่ง = ปุ่มเดิม
+export function CreateOrganizationDialog({ trigger }: { trigger?: ReactNode }) {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
@@ -28,6 +29,7 @@ export function CreateOrganizationDialog() {
       setOpen(false)
       setName("")
     },
+    meta: { silent: true }, // error inline ใน dialog แล้ว
   })
 
   function onSubmit(e: FormEvent) {
@@ -47,7 +49,7 @@ export function CreateOrganizationDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button>+ สร้างองค์กร</Button>
+        {trigger ?? <Button>+ สร้างองค์กร</Button>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

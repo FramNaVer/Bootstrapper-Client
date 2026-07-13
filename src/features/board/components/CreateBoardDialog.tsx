@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react"
+import { useState, type FormEvent, type ReactNode } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { boardApi } from "../api/board.api"
 import { getApiErrorMessage } from "@/shared/api/errors"
@@ -14,7 +14,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-export function CreateBoardDialog({ orgId }: { orgId: string }) {
+// trigger: ปุ่มเปิด dialog กำหนดเองได้ (เช่นปุ่ม + เล็กใน sidebar) — ไม่ส่ง = ปุ่มเดิม
+export function CreateBoardDialog({
+  orgId,
+  trigger,
+}: {
+  orgId: string
+  trigger?: ReactNode
+}) {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
@@ -26,6 +33,7 @@ export function CreateBoardDialog({ orgId }: { orgId: string }) {
       setOpen(false)
       setName("")
     },
+    meta: { silent: true }, // error inline ใน dialog แล้ว
   })
 
   function onSubmit(e: FormEvent) {
@@ -45,7 +53,7 @@ export function CreateBoardDialog({ orgId }: { orgId: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button>+ สร้างบอร์ด</Button>
+        {trigger ?? <Button>+ สร้างบอร์ด</Button>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

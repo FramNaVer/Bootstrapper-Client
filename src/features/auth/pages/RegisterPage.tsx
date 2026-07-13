@@ -27,6 +27,7 @@ export function RegisterPage() {
         : ""
       navigate(`/login?registered=1${suffix}`, { replace: true })
     },
+    meta: { silent: true }, // error inline ในฟอร์มแล้ว
   })
 
   function onSubmit(e: FormEvent) {
