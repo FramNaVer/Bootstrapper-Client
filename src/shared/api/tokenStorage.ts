@@ -1,29 +1,38 @@
 // =============================================================
-// Token Storage — เก็บ access/refresh token ใน localStorage
+// Access Token Storage — sessionStorage (P4: refresh อยู่ใน httpOnly cookie แล้ว)
 // =============================================================
-// ทำไม localStorage? ง่ายและพอสำหรับโปรเจคนี้
-// ข้อแลกเปลี่ยน: ถ้าเว็บโดน XSS โจรอ่าน token ได้ → ทางที่ปลอดภัยกว่าคือ
-// httpOnly cookie (JS อ่านไม่ได้) แต่ backend ต้องเซ็ต cookie ให้ ซึ่งเป็นงานเพิ่ม
-// → บันทึกไว้เป็นจุดอัปเกรดในอนาคต
+// ฝั่ง JS เหลือแค่ access token อายุ 15 นาที — refresh token (ของมีค่าจริง
+// เพราะอายุ 7 วัน) อยู่ใน httpOnly cookie ที่ JavaScript อ่านไม่ได้เลย
+// → ต่อให้โดน XSS โจรได้อย่างมากแค่ access token อายุสั้นของแท็บเดียว
 //
-// แยกไฟล์นี้ออกมาเพราะ axios (นอก React) ก็ต้องอ่าน token ด้วย
-// ทำให้เป็น "แหล่งความจริงเดียว" ของ token ที่ทั้ง React และ axios ใช้ร่วมกัน
+// ทำไม sessionStorage ไม่ใช่ localStorage: แยกต่อแท็บและหายเมื่อปิดแท็บ
+// ทำไมไม่เก็บใน memory ล้วน: reload แล้วหาย ทุกครั้งที่กด F5 ต้องยิง /refresh
+// เพิ่ม latency + เพิ่ม rotation ฟรีๆ — sessionStorage รอด reload พอดี
 // =============================================================
 
 const ACCESS_KEY = "accessToken"
-const REFRESH_KEY = "refreshToken"
 
 export const tokenStorage = {
-  getAccess: () => localStorage.getItem(ACCESS_KEY),
-  getRefresh: () => localStorage.getItem(REFRESH_KEY),
+  getAccess: () => sessionStorage.getItem(ACCESS_KEY),
 
-  set(accessToken: string, refreshToken: string) {
-    localStorage.setItem(ACCESS_KEY, accessToken)
-    localStorage.setItem(REFRESH_KEY, refreshToken)
+  setAccess(accessToken: string) {
+    sessionStorage.setItem(ACCESS_KEY, accessToken)
   },
 
   clear() {
-    localStorage.removeItem(ACCESS_KEY)
-    localStorage.removeItem(REFRESH_KEY)
+    sessionStorage.removeItem(ACCESS_KEY)
+    // เก็บกวาดของยุค localStorage (client รุ่นก่อน P4) ทิ้งด้วย
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("refreshToken")
   },
+}
+
+// token รุ่นเก่าที่ค้างใน localStorage จาก client รุ่นก่อน — หยิบ "ครั้งเดียว"
+// เพื่อ migrate เข้าระบบ cookie (ส่งใน body ให้ backend ฝัง cookie ให้) แล้วลบทิ้งทันที
+// → ผู้ใช้เดิมไม่โดนเด้งออกตอนอัปเวอร์ชัน
+export function takeLegacyRefreshToken(): string | null {
+  const legacy = localStorage.getItem("refreshToken")
+  localStorage.removeItem("refreshToken")
+  localStorage.removeItem("accessToken")
+  return legacy
 }
