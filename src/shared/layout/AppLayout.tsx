@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, Outlet, useLocation } from "react-router-dom"
 import { Menu } from "lucide-react"
 import { NotificationBell } from "@/features/notification/NotificationBell"
+import { useOrgRemovedRealtime } from "@/features/organization/useOrgRemovedRealtime"
 import { OrgRail } from "./OrgRail"
 import { OrgSidebar } from "./OrgSidebar"
 
@@ -12,6 +13,9 @@ import { OrgSidebar } from "./OrgSidebar"
 export function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const location = useLocation()
+
+  // ถูกนำออกจาก org → ล้าง cache + เด้งออกจากหน้าของ org นั้น (ดูในไฟล์ hook)
+  useOrgRemovedRealtime()
 
   // เปลี่ยนหน้า = ผู้ใช้เลือกปลายทางแล้ว → ปิด drawer ให้อัตโนมัติ
   useEffect(() => {
