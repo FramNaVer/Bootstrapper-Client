@@ -14,7 +14,7 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -27,9 +27,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # ESLint — กฎ react-hooks (deps ขาด/setState ใน effect) + react-refresh
+      # (คนละเรื่องกับ typecheck: tsc จับ type ผิด, eslint จับ logic เหม็น)
+      - name: Lint
+        run: npm run lint
+
       # type-check (tsc --noEmit) — จับ type error ก่อนถึง prod
       - name: Type check
-        run: npm run lint
+        run: npm run typecheck
 
       # vite build — ยืนยันว่า bundle production สร้างได้จริง (เหมือนที่ Vercel รัน)
       # ไม่ต้องใช้ VITE_API_URL ที่นี่ (ค่าจริงตั้งใน Vercel ตอน deploy)
