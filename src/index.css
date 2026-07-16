@@ -3,9 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ธีมสีแบรนด์: ม่วง Violet (อิงค่า oklch จากจานสี Tailwind: violet-500/600 ฯลฯ)
+/* ธีมสีแบรนด์: ส้ม Orange (อิงค่า oklch จากจานสี Tailwind: orange-500/600 ฯลฯ)
    แก้ที่ token กลางที่เดียว ทุกปุ่ม/ลิงก์/ไฮไลต์ทั้งแอปเปลี่ยนตาม
-   accent แต้มม่วงจางๆ (chroma ต่ำ) → hover/รายการที่เลือกดูเป็นธีมเดียวกัน */
+   accent แต้มส้มจางๆ (chroma ต่ำ) → hover/รายการที่เลือกดูเป็นธีมเดียวกัน
+   พื้นหลัง cream + ลายจุด ของหน้า auth อยู่ที่ AuthShell (ไม่แตะ token กลาง) */
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -14,21 +15,21 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.541 0.281 293.009); /* violet-600 */
-  --primary-foreground: oklch(0.969 0.016 293.756); /* violet-50 */
+  --primary: oklch(0.646 0.222 41.116); /* orange-600 */
+  --primary-foreground: oklch(0.98 0.016 73.684); /* orange-50 */
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.955 0.024 293); /* ม่วงจางเกือบขาว */
+  --accent: oklch(0.955 0.024 60); /* ส้มจางเกือบขาว */
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.606 0.25 292.717); /* violet-500 */
+  --ring: oklch(0.705 0.213 47.604); /* orange-500 */
 }
 
-/* โหมดมืด: primary ขยับสว่างขึ้นหนึ่งขั้น (violet-500) —
+/* โหมดมืด: primary ขยับสว่างขึ้นหนึ่งขั้น (orange-500) —
    สีเข้มบนพื้นมืดจะจมหาย ต้องสว่างกว่าเดิมถึงจะเด่นเท่าเดิม */
 .dark {
   --background: oklch(0.145 0 0);
@@ -37,18 +38,18 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.606 0.25 292.717); /* violet-500 */
-  --primary-foreground: oklch(0.969 0.016 293.756); /* violet-50 */
+  --primary: oklch(0.705 0.213 47.604); /* orange-500 */
+  --primary-foreground: oklch(0.98 0.016 73.684); /* orange-50 */
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.31 0.05 293); /* ม่วงหม่นบนพื้นมืด */
+  --accent: oklch(0.31 0.05 55); /* ส้มหม่นบนพื้นมืด */
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.702 0.183 293.541); /* violet-400 */
+  --ring: oklch(0.75 0.16 50); /* orange-400 */
 }
 
 @theme inline {
@@ -82,5 +83,29 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* พื้นหลังหน้า auth: cream + ลายจุด — จำกัดเฉพาะหน้า auth (ผ่าน AuthShell)
+   ไม่ไปแตะ --background กลาง ในโหมดมืดพับกลับไปใช้พื้นมืดของ token */
+@layer components {
+  .bg-auth {
+    background-color: oklch(0.97 0.008 75); /* cream อุ่น */
+  }
+  .dark .bg-auth {
+    background-color: var(--background);
+  }
+  .auth-dots {
+    background-image: radial-gradient(
+      oklch(0.55 0.06 55 / 0.14) 1px,
+      transparent 1.5px
+    );
+    background-size: 22px 22px;
+  }
+  .dark .auth-dots {
+    background-image: radial-gradient(
+      oklch(1 0 0 / 0.06) 1px,
+      transparent 1.5px
+    );
   }
 }
