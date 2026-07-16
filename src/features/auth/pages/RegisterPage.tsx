@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useMutation } from "@tanstack/react-query"
 import { authApi } from "../api/auth.api"
 import { getApiErrorMessage } from "@/shared/api/errors"
+import { AuthShell } from "../components/AuthShell"
+import { OAuthButtons } from "../components/OAuthButtons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -36,73 +37,60 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>สมัครสมาชิก</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="displayName">ชื่อที่แสดง</Label>
-              <Input
-                id="displayName"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                autoComplete="name"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">อีเมล</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">รหัสผ่าน</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                minLength={8}
-              />
-            </div>
+    <AuthShell
+      active="register"
+      title="สร้างบัญชีใหม่"
+      subtitle="เริ่มจัดการบอร์ดของทีมคุณได้ในไม่กี่นาที"
+      redirect={redirect}
+    >
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="displayName">ชื่อที่แสดง</Label>
+          <Input
+            id="displayName"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            autoComplete="name"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="email">อีเมล</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="password">รหัสผ่าน</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="new-password"
+            minLength={8}
+          />
+        </div>
 
-            {register.isError && (
-              <p className="text-destructive text-sm">
-                {getApiErrorMessage(register.error, "สมัครสมาชิกไม่สำเร็จ")}
-              </p>
-            )}
-
-            <Button type="submit" disabled={register.isPending}>
-              {register.isPending ? "กำลังสมัคร…" : "สมัครสมาชิก"}
-            </Button>
-          </form>
-
-          <p className="text-muted-foreground mt-5 text-center text-sm">
-            มีบัญชีอยู่แล้ว?{" "}
-            <Link
-              to={
-                redirect
-                  ? `/login?redirect=${encodeURIComponent(redirect)}`
-                  : "/login"
-              }
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              เข้าสู่ระบบ
-            </Link>
+        {register.isError && (
+          <p className="text-destructive text-sm">
+            {getApiErrorMessage(register.error, "สมัครสมาชิกไม่สำเร็จ")}
           </p>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+
+        <Button type="submit" disabled={register.isPending}>
+          {register.isPending ? "กำลังสมัคร…" : "สมัครสมาชิก"}
+        </Button>
+      </form>
+
+      <OAuthButtons />
+    </AuthShell>
   )
 }
