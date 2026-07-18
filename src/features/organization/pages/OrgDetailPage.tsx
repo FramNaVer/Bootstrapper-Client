@@ -50,12 +50,18 @@ export function OrgDetailPage() {
     refetchInterval: 60_000,
   })
 
-  // การ์ดกำหนดส่งย้อนหลังทั้งหมด → ปลายสัปดาห์นี้ (พอสำหรับนับ เลยกำหนด + สัปดาห์นี้)
+  // การ์ดกำหนดส่ง: ย้อนหลัง 90 วัน → สิ้นสัปดาห์นี้ (รวม ~96 วัน)
+  // backend จำกัดช่วง query ไว้ 100 วัน (กัน scan ไร้ขอบเขต) — ขอกว้างกว่านั้นโดน 400
+  // ผล: "เลยกำหนด" นับเฉพาะที่ค้างใน 90 วันล่าสุด (เก่ากว่านั้นถือว่า stale เกินจะนับ)
   const { mondayKey, sundayKey } = thisWeekRange()
   const todayKey = dateKey(new Date())
+  const now = new Date()
+  const from90 = dateKey(
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90)
+  )
   const { data: dueCards } = useQuery({
-    queryKey: ["due-stats", orgId, sundayKey],
-    queryFn: () => organizationApi.listDueCards(orgId, "2000-01-01", sundayKey),
+    queryKey: ["due-stats", orgId, from90, sundayKey],
+    queryFn: () => organizationApi.listDueCards(orgId, from90, sundayKey),
   })
 
   const overdue = dueCards?.filter((c) => c.dueDate.slice(0, 10) < todayKey).length
