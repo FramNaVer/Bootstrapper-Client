@@ -124,7 +124,7 @@ export function OrgDetailPage() {
 
       {/* ปฏิทิน (ซ้าย) + สมาชิก (ขวา) */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="bg-card rounded-xl border p-4 lg:col-span-2">
+        <div className="bg-card rounded-xl border p-4 shadow-md shadow-black/5 lg:col-span-2">
           <OrgCalendar orgId={orgId} />
         </div>
         <MembersPanel orgId={orgId} currentUserId={user?.id ?? ""} />
@@ -145,7 +145,8 @@ function StatTile({
   hint: string
 }) {
   return (
-    <div className="bg-card rounded-xl border p-4">
+    // เงานุ่ม + ยกตัวเล็กน้อยตอน hover — ให้การ์ดสถิติมีมิติ ไม่แบนติดพื้น
+    <div className="bg-card rounded-xl border p-4 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
       <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <span className={cn("size-2 rounded-full", dotClass)} />
         {label}

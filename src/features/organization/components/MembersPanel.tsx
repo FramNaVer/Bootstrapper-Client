@@ -37,7 +37,7 @@ export function MembersPanel({
   const onlineCount = sorted.filter((m) => isOnline(m.lastSeenAt)).length
 
   return (
-    <div className="bg-card rounded-xl border">
+    <div className="bg-card rounded-xl border shadow-md shadow-black/5">
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="font-semibold">สมาชิก</h2>
         <span className="text-muted-foreground text-xs">
@@ -62,7 +62,7 @@ function MemberRow({ member, isSelf }: { member: Member; isSelf: boolean }) {
   const name = member.displayName ?? member.email
 
   return (
-    <li className="flex items-center gap-3 rounded-md px-2 py-2">
+    <li className="hover:bg-accent/50 flex items-center gap-3 rounded-md px-2 py-2 transition-colors">
       {/* avatar + จุดสถานะ */}
       <span className="relative shrink-0">
         <span
