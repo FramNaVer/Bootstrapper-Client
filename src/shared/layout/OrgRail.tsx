@@ -22,7 +22,7 @@ export function OrgRail() {
   })
 
   return (
-    <nav className="bg-secondary/60 flex w-[72px] shrink-0 flex-col items-center gap-2 overflow-y-auto border-r py-3">
+    <nav className="bg-secondary/60 flex w-18 shrink-0 flex-col items-center gap-2 overflow-y-auto border-r py-3">
       {/* ปุ่มโฮม — กลับหน้ารวมองค์กร */}
       <Link
         to="/"

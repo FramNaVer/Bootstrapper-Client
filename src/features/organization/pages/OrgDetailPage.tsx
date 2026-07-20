@@ -2,17 +2,36 @@ import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { organizationApi } from "../api/organization.api"
 import { MembersDialog } from "../components/MembersDialog"
+import { MembersPanel } from "../components/MembersPanel"
 import { OrgCalendar } from "../components/OrgCalendar"
+import { boardApi } from "@/features/board/api/board.api"
 import { CreateBoardDialog } from "@/features/board/components/CreateBoardDialog"
 import { useAuth } from "@/features/auth/AuthContext"
+import { useTheme } from "@/shared/theme/ThemeProvider"
+import { isOnline } from "@/shared/lib/presence"
+import { cn } from "@/lib/utils"
 
-// "โฮมขององค์กร" — โชว์เฉพาะสิ่งที่ sidebar ทำแทนไม่ได้: ภาพรวมข้ามบอร์ด
-// (grid รายชื่อบอร์ดเดิมถูกถอดออก เพราะซ้ำกับ sidebar ของ shell 100%)
+// key ประจำวันแบบ YYYY-MM-DD (local) — จับคู่กับ dueDate ของการ์ด
+function dateKey(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${d.getFullYear()}-${m}-${day}`
+}
+
+// ช่วงสัปดาห์นี้ (จันทร์–อาทิตย์) ตามเวลา local
+function thisWeekRange() {
+  const now = new Date()
+  const diffToMon = (now.getDay() + 6) % 7 // 0=อาทิตย์ → ถอยไปจันทร์
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMon)
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)
+  return { mondayKey: dateKey(monday), sundayKey: dateKey(sunday) }
+}
+
+// "โฮมขององค์กร" — ภาพรวมข้ามบอร์ด: สถิติ + ปฏิทินกำหนดส่ง + สมาชิก (presence สด)
 export function OrgDetailPage() {
   const { orgId } = useParams() as { orgId: string }
   const { user } = useAuth()
 
-  // ชื่อ org ดึงจาก cache เดิม (rail/หน้า list โหลดไว้แล้ว) ไม่ยิงซ้ำ
   const { data: organizations } = useQuery({
     queryKey: ["organizations"],
     queryFn: organizationApi.list,
@@ -20,18 +39,51 @@ export function OrgDetailPage() {
   const org = organizations?.find((o) => o.id === orgId)
   const canManage = org?.role === "OWNER" || org?.role === "ADMIN"
 
+  const { data: boards } = useQuery({
+    queryKey: ["boards", orgId],
+    queryFn: () => boardApi.listBoards(orgId),
+  })
+
+  const { data: members } = useQuery({
+    queryKey: ["members", orgId],
+    queryFn: () => organizationApi.listMembers(orgId),
+    refetchInterval: 60_000,
+  })
+
+  // การ์ดกำหนดส่ง: ย้อนหลัง 90 วัน → สิ้นสัปดาห์นี้ (รวม ~96 วัน)
+  // backend จำกัดช่วง query ไว้ 100 วัน (กัน scan ไร้ขอบเขต) — ขอกว้างกว่านั้นโดน 400
+  // ผล: "เลยกำหนด" นับเฉพาะที่ค้างใน 90 วันล่าสุด (เก่ากว่านั้นถือว่า stale เกินจะนับ)
+  const { mondayKey, sundayKey } = thisWeekRange()
+  const todayKey = dateKey(new Date())
+  const now = new Date()
+  const from90 = dateKey(
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90)
+  )
+  const { data: dueCards } = useQuery({
+    queryKey: ["due-stats", orgId, from90, sundayKey],
+    queryFn: () => organizationApi.listDueCards(orgId, from90, sundayKey),
+  })
+
+  const overdue = dueCards?.filter((c) => c.dueDate.slice(0, 10) < todayKey).length
+  const dueThisWeek = dueCards?.filter((c) => {
+    const k = c.dueDate.slice(0, 10)
+    return k >= mondayKey && k <= sundayKey
+  }).length
+  const onlineCount = members?.filter((m) => isOnline(m.lastSeenAt)).length ?? 0
+
   return (
-    <div className="mx-auto max-w-5xl p-6">
-      <div className="mb-6 flex items-center justify-between gap-3">
+    <div className="mx-auto max-w-6xl p-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold">
             {org?.name ?? "องค์กร"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            ปฏิทินกำหนดส่งรวมจากทุกบอร์ดขององค์กร
+            ภาพรวมองค์กร บอร์ด งาน และสมาชิกทั้งหมดในที่เดียว
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <MembersDialog
             orgId={orgId}
             currentUserId={user?.id ?? ""}
@@ -42,7 +94,90 @@ export function OrgDetailPage() {
         </div>
       </div>
 
-      <OrgCalendar orgId={orgId} />
+      {/* สถิติภาพรวม */}
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile
+          dotClass="bg-primary"
+          label="บอร์ดทั้งหมด"
+          value={boards?.length}
+          hint="ในองค์กรนี้"
+        />
+        <StatTile
+          dotClass="bg-blue-500"
+          label="กำหนดส่งสัปดาห์นี้"
+          value={dueThisWeek}
+          hint="การ์ดที่ต้องติดตาม"
+        />
+        <StatTile
+          dotClass="bg-destructive"
+          label="เลยกำหนด"
+          value={overdue}
+          hint="ต้องจัดการด่วน"
+        />
+        <StatTile
+          dotClass="bg-green-500"
+          label="สมาชิก"
+          value={members?.length}
+          hint={`${onlineCount} ออนไลน์ตอนนี้`}
+        />
+      </div>
+
+      {/* ปฏิทิน (ซ้าย) + สมาชิก (ขวา) */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="bg-card rounded-xl border p-4 shadow-md shadow-black/5 lg:col-span-2">
+          <OrgCalendar orgId={orgId} />
+        </div>
+        <MembersPanel orgId={orgId} currentUserId={user?.id ?? ""} />
+      </div>
+    </div>
+  )
+}
+
+function StatTile({
+  dotClass,
+  label,
+  value,
+  hint,
+}: {
+  dotClass: string
+  label: string
+  value: number | undefined
+  hint: string
+}) {
+  return (
+    // เงานุ่ม + ยกตัวเล็กน้อยตอน hover — ให้การ์ดสถิติมีมิติ ไม่แบนติดพื้น
+    <div className="bg-card rounded-xl border p-4 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+        <span className={cn("size-2 rounded-full", dotClass)} />
+        {label}
+      </div>
+      <p className="mt-1 text-3xl font-bold">{value ?? "—"}</p>
+      <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
+    </div>
+  )
+}
+
+// สลับธีมแบบ segmented (สว่าง/มืด) — ใช้ toggleTheme เดิม กดฝั่งที่ active อยู่แล้ว = no-op
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const btn = (target: "light" | "dark", labelText: string) => (
+    <button
+      type="button"
+      onClick={() => theme !== target && toggleTheme()}
+      className={cn(
+        "rounded-md px-3 py-1 text-sm font-medium transition-colors",
+        theme === target
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {labelText}
+    </button>
+  )
+  return (
+    <div className="bg-muted flex items-center gap-1 rounded-lg p-1">
+      {btn("light", "สว่าง")}
+      {btn("dark", "มืด")}
     </div>
   )
 }
