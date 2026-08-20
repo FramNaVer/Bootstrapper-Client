@@ -1,5 +1,4 @@
-<img width="1150" height="602" alt="image" src="https://github.com/user-attachments/assets/37a4fdea-50ed-42d8-ba6c-d3fd7ff2b98a" /># Bootstrapper Client — Multi-Tenant Kanban SaaS (Web)
-
+# Bootstrapper Client — Multi-Tenant Kanban SaaS (Web)
 [![CI](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](package.json)
