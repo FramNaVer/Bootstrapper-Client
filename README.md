@@ -1,8 +1,25 @@
 # Bootstrapper Client — Multi-Tenant Kanban SaaS (Web)
 
+[![CI](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
+[![Vercel](https://img.shields.io/badge/deployed-Vercel-black?logo=vercel)](https://board.tanadon-i.com)
+
 React SPA for [Bootstrapper](https://github.com/FramNaVer/Bootstrapper) — a multi-tenant team task manager with real-time boards, org chat, and a cross-board due-date calendar.
 
-**Live:** [board.tanadon-i.com](https://board.tanadon-i.com) · deployed on Vercel
+## Try it
+
+**→ [board.tanadon-i.com](https://board.tanadon-i.com)** · deployed on Vercel
+
+Sign in with the demo account — no registration, no email verification:
+
+| | |
+|---|---|
+| **Email** | `demo@tanadon-i.com` |
+| **Password** | `DemoPass123!` |
+
+Drag cards between columns, open a card for labels and comments, check the org calendar, and send a chat message. Open it in two browsers to watch both sync live.
 
 ## Tech stack
 
