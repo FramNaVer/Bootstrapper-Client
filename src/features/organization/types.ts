@@ -19,6 +19,8 @@ export interface Member {
   displayName: string | null
   role: MembershipRole
   joinedAt: string
+  // เวลา active ล่าสุด (ISO) — ใช้คำนวณ "ออนไลน์"/"เห็นล่าสุดเมื่อ" (null = ยังไม่เคยออนไลน์)
+  lastSeenAt: string | null
 }
 
 // การ์ดบนปฏิทินรวมของ org (จาก GET /organizations/:orgId/cards)

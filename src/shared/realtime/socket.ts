@@ -25,7 +25,15 @@ export function getSocket(): Socket {
     // ต่อสำเร็จ = token ใช้ได้ → คืนโควต้ากู้ (เผื่อพับจอรอบถัดไป)
     socket.on("connect", () => {
       recoverAttempts = 0
+      socket?.emit("heartbeat") // active ทันทีที่ต่อได้
     })
+
+    // presence: บอก server ว่ายัง active อยู่เป็นระยะ ระหว่างเปิดแอป
+    // → server อัปเดต lastSeenAt (throttle ฝั่ง server แล้ว) ให้สมาชิกคนอื่นเห็น "ออนไลน์"
+    // interval ตัวเดียวตลอดอายุ socket singleton — emit เฉพาะตอนต่ออยู่จริง
+    setInterval(() => {
+      if (socket?.connected) socket.emit("heartbeat")
+    }, 60_000)
 
     socket.on("connect_error", async () => {
       // active = true → ปัญหา network, socket.io กำลัง retry เองอยู่ ไม่ต้องยุ่ง
