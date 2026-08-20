@@ -1,4 +1,4 @@
-# Bootstrapper Client — Multi-Tenant Kanban SaaS (Web)
+<img width="1150" height="602" alt="image" src="https://github.com/user-attachments/assets/37a4fdea-50ed-42d8-ba6c-d3fd7ff2b98a" /># Bootstrapper Client — Multi-Tenant Kanban SaaS (Web)
 
 [![CI](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml/badge.svg)](https://github.com/FramNaVer/Bootstrapper-Client/actions/workflows/codeql.yml)
@@ -13,11 +13,14 @@ React SPA for [Bootstrapper](https://github.com/FramNaVer/Bootstrapper) — a mu
 **→ [board.tanadon-i.com](https://board.tanadon-i.com)** · deployed on Vercel
 
 Sign in with the demo account — no registration, no email verification:
+<img width="1892" height="907" alt="image" src="https://github.com/user-attachments/assets/9f45e35c-f71f-4d75-bdd1-b0835ba6f9d7" />
 
 | | |
 |---|---|
-| **Email** | `demo@tanadon-i.com` |
-| **Password** | `DemoPass123!` |
+| **Email** | `example@gmail.com` |
+| **Password** | `12345678` |
+<img width="1897" height="912" alt="image" src="https://github.com/user-attachments/assets/7ce16d70-8144-45d4-9066-8afccb5129a4" />
+
 
 Drag cards between columns, open a card for labels and comments, check the org calendar, and send a chat message. Open it in two browsers to watch both sync live.
 
