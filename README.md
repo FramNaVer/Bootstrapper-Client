@@ -43,11 +43,11 @@ Discord-style three-column layout: an **org rail** (round icons, one per organiz
 ┌──────┬────────────────┬───────────────────────────┐
 │ Rail │ Sidebar        │ Main (Outlet)             │
 │ [B]  │ org name       │  /org/:id      → calendar │
-│ (◯)  │ ── boards ──   │  /org/:id/chat → chat     │
-│ (◯)  │  # Sprint 1    │  /.../board/:id → kanban  │
+│ (◯) │ ── boards ──   │  /org/:id/chat → chat     │
+│ (◯) │  # Sprint 1    │  /.../board/:id → kanban  │
 │ (+)  │ ── chat ──     │                           │
 │      ├────────────────┤                           │
-│      │ 👤 user 🌙 🔔 ⏻ │                           │
+│      │ 👤 🌙 🔔 ⏻   │                           │
 └──────┴────────────────┴───────────────────────────┘
 ```
 
